@@ -1,0 +1,5 @@
+---
+# Handlers for p2p
+
+#- name: example restart
+#  action: service name=service state=restarted

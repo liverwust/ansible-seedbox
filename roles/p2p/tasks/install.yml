@@ -1,0 +1,133 @@
+---
+
+- name: Launch Rtorrent-Flood
+  docker_container:
+    name: flood
+    image: wonderfall/rtorrent-flood:latest
+    state: started
+    restart_policy: on-failure
+    restart: yes
+    env:
+        FLOOD_SECRET: "{{ flood_secret }}"
+        # WEBROOT: "{{ flood_root }}"
+        UID: "1001"
+        GID: "1001"
+    tty: yes
+    volumes:
+      - "/var/lib/flood/data:/data"
+      - "/var/flood/db:/flood-db"
+    networks:
+      - name: p2p
+
+- name: Directories hierarchy
+  file:
+    path: "/etc/{{ item }}"
+    state: directory
+  with_items:
+    - radarr
+    - sonarr
+    - jackett
+
+- name: Enabling proxy for radarr
+  template:
+    src: radarr_config.j2
+    dest: /etc/radarr/config.xml
+    owner: ec2-user
+    group: radarr
+
+- name: Radarr
+  docker_container:
+    name: radarr
+    image: linuxserver/radarr:latest
+    state: started
+    restart: yes
+    recreate: yes
+    volumes:
+      - "/etc/radarr:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        UID: "1003"
+        GID: "911"
+    networks:
+      - name: p2p
+
+- name: Enabling proxy for sonarr
+  template:
+    src: sonarr_config.j2
+    dest: /etc/sonarr/config.xml
+    owner: ec2-user
+    group: radarr
+
+- name: Sonarr
+  docker_container:
+    name: sonarr
+    image: linuxserver/sonarr:latest
+    state: started
+    restart: yes
+    volumes:
+      - "/etc/sonarr:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        UID: "1003"
+        GID: "911"
+    networks:
+      - name: p2p
+
+- name: Configure Jackett for reverse proxy
+  template:
+    src: jackett_config.j2
+    dest: /etc/jackett/ServerConfig.json
+
+- name: Jackett
+  docker_container:
+    name: jackett
+    image: linuxserver/jackett:latest
+    state: started
+    restart: yes
+    volumes:
+      - "/etc/jackett:/config/Jackett"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        UID: "1003"
+        GID: "911"
+    # ports:
+    #   - "8080:9117"
+    networks:
+      - name: p2p
+
+# - name: Configure Jackett for reverse proxy
+#   lineinfile:
+#     path: /etc/jackett/ServerConfig.json
+#     regexp: '{{ item.regex }}'
+#     line: '{{ item.replace }}'
+#   with_items:
+#     - { regex: '^\s*"BasePathOverride":.*,$', replace: '  "BasePathOverride": "{{ jackett_root }}",' }
+#     - { regex: '^\s*"ProxyUrl":.*,$', replace: '  "ProxyUrl": "{{ domain }}",' }
+
+- name: Caddyfile
+  template:
+    src: caddyfile.j2
+    dest: /etc/Caddyfile
+
+- name: Reverse-Proxy
+  docker_container:
+    name: reverse-proxy
+    image: zzrot/alpine-caddy
+    state: started
+    restart: yes
+    # recreate: yes
+    # restart_policy: on-failure
+    volumes:
+      - "/etc/Caddyfile:/etc/Caddyfile"
+      - "/var/caddy/srv:/var/www/html"
+      - "/etc/caddy/certs:/root/.caddy/certs"
+    ports:
+      - "80:80"
+      - "443:2015"
+    networks:
+      - name: p2p
+        links:
+          - flood:flood
+          - radarr:radarr
+          - sonarr:sonarr
+          - jackett:jackett

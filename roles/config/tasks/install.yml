@@ -1,0 +1,53 @@
+---
+
+- name: Creating groups
+  group:
+    name: "{{ item }}"
+    state: present
+  whith_items:
+    - wheel
+    - p2p
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: Creating users
+  user: 
+    name: "{{ item.name }}"
+    groups: "{{ item.groups}} "
+    append: "{{ item.append}}"
+    state: present
+    createhome: "{{ item.createhome }}"
+  with_items:
+    - { name: "deployer", groups: "wheel", append: yes, createhome: yes }
+    - { name: "p2p", groups: "p2p", append: yes, createhome: no }
+
+
+- name: Set up authorized keys for the deployer user
+  authorized_key: 
+    user: deployer 
+    key: "{{ item }}"
+  with_file:
+    - "~/.ssh/id_rsa.pub"
+
+- name: Install Packages
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - docker
+      - python2-pip
+
+- name: Start dockerd
+  service:
+    name: docker
+    state: started
+
+- name: Install docker python interface
+  pip:
+    name: docker

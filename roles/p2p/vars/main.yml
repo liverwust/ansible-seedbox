@@ -1,0 +1,6 @@
+---
+flood_root: "/flood"
+radarr_root: "/radarr"
+sonarr_root: "/sonarr"
+jackett_root: "/jackett"
+flood_secret: "floodsecret"

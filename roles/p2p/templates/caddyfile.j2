@@ -1,0 +1,8 @@
+"www.{{ domain }}", "{{ domain }}" {
+				proxy {{ flood_root }}		flood:3000
+				proxy {{ radarr_root }}		radarr:7878
+				proxy {{ sonarr_root }}		sonarr:8989
+				proxy {{ jackett_root }}	jackett:9117
+				gzip
+				tls self_signed
+}
