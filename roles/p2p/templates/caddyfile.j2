@@ -1,9 +1,7 @@
-"www.{{ domain }}", "{{ domain }}" {
-				root	/var/www/html
-
-				fastcgi /RPC2		flood:5000	php
-				basicauth /RPC2		hanks		hanks
+"{{ domain }}" {
 				tls {{ user_mail }}
+				fastcgi 	/RPC2 	flood:12345		php
+				basicauth 	/ 		hanks 			hanks
 }
 
 "plex.{{ domain }}" {
@@ -62,6 +60,18 @@
 "tautulli.{{ domain }}" {
 				gzip
 				proxy 		/					tautulli:8181		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"rtorrent.{{ domain }}" {
+				gzip
+				proxy 		/rutorrent					flood:9443		{
+				transparent
+				}
+				proxy 		/flood						flood:3000		{
 				transparent
 				}
 				tls {{ user_mail }}

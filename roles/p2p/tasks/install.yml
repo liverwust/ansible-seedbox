@@ -3,20 +3,21 @@
 - name: Launch Rtorrent-Flood
   docker_container:
     name: flood
-    image: wonderfall/rtorrent-flood:new
+    image: romancin/rutorrent-flood:latest
     state: started
     env:
-        FLOOD_SECRET: "{{ flood_secret }}"
-        WEBROOT: "{{ flood_root }}"
         UID: "991"
         GID: "991"
-        RTORRENT_SCGI: "5001"
     tty: yes
     recreate: yes
     volumes:
-      - "{{ flood_download }}:/data"
-      - "{{ flood_db }}:/flood-db"
+      - "{{ flood_download }}:/downloads"
+      - "{{ flood_config }}:/config"
       - "/etc/localtime:/etc/localtime:ro"
+    # ports:
+    #   - "9443:443"
+    #   - "3000:3000"
+      # - "51415-51415:51415-51415"
     networks:
       - name: p2p
 
@@ -37,12 +38,6 @@
       - "/var/lib/plex/transcode:/transcode"
       - "{{ plex_config }}:/config"
       - "/etc/localtime:/etc/localtime:ro"
-    # ports:
-    #   - "32400:32400/udp"
-    #   - "32469:32469"
-    #   - "32469:32469/udp"
-    #   - "5353:5353/udp"
-    #   - "1900:1900/udp"
     networks:
       - name: p2p
 
@@ -56,13 +51,6 @@
     - jackett
     - ombi
     - tautulli
-
-# - name: Enabling proxy for radarr
-#   template:
-#     src: radarr_config.j2
-#     dest: /etc/radarr/config.xml
-#     owner: p2p
-#     group: p2p
 
 - name: Radarr
   docker_container:
@@ -83,14 +71,6 @@
       - name: p2p
         links:
           - plex:plex
-          - flood:flood
-
-# - name: Enabling proxy for sonarr
-#   template:
-#     src: sonarr_config.j2
-#     dest: /etc/sonarr/config.xml
-#     owner: p2p
-#     group: p2p
 
 - name: Sonarr
   docker_container:
@@ -110,12 +90,6 @@
       - name: p2p
         links:
           - plex:plex
-          - flood:flood
-
-# - name: Configure Jackett for reverse proxy
-#   template:
-#     src: jackett_config.j2
-#     dest: /etc/jackett/ServerConfig.json
 
 - name: Jackett
   docker_container:
@@ -184,7 +158,7 @@
     # restart_policy: on-failure
     volumes:
       - "/etc/Caddyfile:/etc/Caddyfile"
-      - "/var/caddy/srv:/var/www/html"
+      # - "/var/caddy/srv:/var/www/html"
       - "/etc/caddy/certs:/root/.caddy"
       - "/etc/localtime:/etc/localtime:ro"
     env:

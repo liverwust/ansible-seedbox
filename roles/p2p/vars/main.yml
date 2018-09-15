@@ -18,7 +18,7 @@ flood_secret: "floodsecret"
 p2p_root: "/var/lib/p2p"
 
 flood_download: "{{ p2p_root }}/download"
-flood_db: "/var/flood"
+flood_config: "/etc/flood"
 
 plex_movies: "/var/lib/plex/movies"
 plex_tv: "/var/lib/plex/tv"
