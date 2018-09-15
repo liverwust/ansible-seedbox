@@ -1,6 +1,26 @@
 ---
-flood_root: "/flood"
-radarr_root: "/radarr"
-sonarr_root: "/sonarr"
-jackett_root: "/jackett"
+# flood_root: "/flood"
+flood_root: "/"
+# radarr_root: "/radarr"
+radarr_root: "/"
+# sonarr_root: "/sonarr"
+sonarr_root: "/"
+# jackett_root: "/jackett"
+jackett_root: ""
+# plex_root: "/plex"
+plex_root: "/"
+plex_config: "/var/plex"
+# ombi_root: "/ombi"
+ombi_root: "/"
+
 flood_secret: "floodsecret"
+
+p2p_root: "/var/lib/p2p"
+
+flood_download: "{{ p2p_root }}/download"
+flood_db: "/var/flood"
+
+plex_movies: "/var/lib/plex/movies"
+plex_tv: "/var/lib/plex/tv"
+
+torrent_blackhole: "{{ p2p_root }}/blackhole"

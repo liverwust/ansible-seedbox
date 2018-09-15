@@ -1,12 +1,15 @@
 ---
 
-- name: Creating groups
+- name: Ensuring group 'wheel' exists
   group:
-    name: "{{ item }}"
+    name: "wheel"
     state: present
-  whith_items:
-    - wheel
-    - p2p
+
+- name: Ensuring group 'p2p' exists
+  group:
+    name: "p2p"
+    state: present
+    gid: 991
 
 - name: Allow 'wheel' group to have passwordless sudo
   lineinfile:
@@ -23,9 +26,12 @@
     append: "{{ item.append}}"
     state: present
     createhome: "{{ item.createhome }}"
+    uid: "{{ item.uid }}"
   with_items:
-    - { name: "deployer", groups: "wheel", append: yes, createhome: yes }
-    - { name: "p2p", groups: "p2p", append: yes, createhome: no }
+    - { name: "deployer", groups: "wheel", append: yes, createhome: yes , uid: "1001" }
+    - { name: "p2p", groups: "p2p", append: yes, createhome: no, uid: "991" }
+    - { name: "plex", groups: "p2p", append: yes, createhome: no, uid: "992" }
+    - { name: "flood", groups: "p2p", append: yes, createhome: no, uid: "993" }
 
 
 - name: Set up authorized keys for the deployer user

@@ -1,8 +1,69 @@
 "www.{{ domain }}", "{{ domain }}" {
-				proxy {{ flood_root }}		flood:3000
-				proxy {{ radarr_root }}		radarr:7878
-				proxy {{ sonarr_root }}		sonarr:8989
-				proxy {{ jackett_root }}	jackett:9117
+				root	/var/www/html
+
+				fastcgi /RPC2		flood:5000	php
+				basicauth /RPC2		hanks		hanks
+				tls {{ user_mail }}
+}
+
+"plex.{{ domain }}" {
+				proxy 		/					plex:32400		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"radarr.{{ domain }}" {
 				gzip
-				tls self_signed
+				proxy 		/					radarr:7878		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"sonarr.{{ domain }}" {
+				gzip
+				proxy 		/					sonarr:8989		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"jackett.{{ domain }}" {
+				gzip
+				proxy 		/					jackett:9117		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"ombi.{{ domain }}" {
+				gzip
+				proxy 		/					ombi:3579		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"flood.{{ domain }}" {
+				gzip
+				proxy 		/					flood:3000		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
+}
+
+"tautulli.{{ domain }}" {
+				gzip
+				proxy 		/					tautulli:8181		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts none
 }

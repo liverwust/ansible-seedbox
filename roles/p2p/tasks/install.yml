@@ -3,19 +3,46 @@
 - name: Launch Rtorrent-Flood
   docker_container:
     name: flood
-    image: wonderfall/rtorrent-flood:latest
+    image: wonderfall/rtorrent-flood:new
     state: started
-    restart_policy: on-failure
-    restart: yes
     env:
         FLOOD_SECRET: "{{ flood_secret }}"
-        # WEBROOT: "{{ flood_root }}"
-        UID: "1001"
-        GID: "1001"
+        WEBROOT: "{{ flood_root }}"
+        UID: "991"
+        GID: "991"
+        RTORRENT_SCGI: "5001"
     tty: yes
+    recreate: yes
     volumes:
-      - "/var/lib/flood/data:/data"
-      - "/var/flood/db:/flood-db"
+      - "{{ flood_download }}:/data"
+      - "{{ flood_db }}:/flood-db"
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - name: p2p
+
+- name: Plex
+  docker_container:
+    name: plex
+    image: plexinc/pms-docker
+    state: started
+    hostname: "{{ hostname }}"
+    env:
+        PLEX_UID: "992"
+        PLEX_GID: "991"
+        PLEX_CLAIM: "{{ plex_claim_token }}"
+        ADVERTISE_IP: "{{ ansible_host }}"
+    volumes:
+      - "{{ plex_movies }}:/data/movies"
+      - "{{ plex_tv }}:/data/tv"
+      - "/var/lib/plex/transcode:/transcode"
+      - "{{ plex_config }}:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    # ports:
+    #   - "32400:32400/udp"
+    #   - "32469:32469"
+    #   - "32469:32469/udp"
+    #   - "5353:5353/udp"
+    #   - "1900:1900/udp"
     networks:
       - name: p2p
 
@@ -27,82 +54,121 @@
     - radarr
     - sonarr
     - jackett
+    - ombi
+    - tautulli
 
-- name: Enabling proxy for radarr
-  template:
-    src: radarr_config.j2
-    dest: /etc/radarr/config.xml
-    owner: ec2-user
-    group: radarr
+# - name: Enabling proxy for radarr
+#   template:
+#     src: radarr_config.j2
+#     dest: /etc/radarr/config.xml
+#     owner: p2p
+#     group: p2p
 
 - name: Radarr
   docker_container:
     name: radarr
     image: linuxserver/radarr:latest
     state: started
-    restart: yes
-    recreate: yes
+    # restart: yes
+    # recreate: yes
     volumes:
       - "/etc/radarr:/config"
+      - "{{ flood_download }}/movies:/downloads"
+      - "{{ plex_movies }}:/movies"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        UID: "1003"
-        GID: "911"
+        PUID: "991"
+        PGID: "991"
     networks:
       - name: p2p
+        links:
+          - plex:plex
+          - flood:flood
 
-- name: Enabling proxy for sonarr
-  template:
-    src: sonarr_config.j2
-    dest: /etc/sonarr/config.xml
-    owner: ec2-user
-    group: radarr
+# - name: Enabling proxy for sonarr
+#   template:
+#     src: sonarr_config.j2
+#     dest: /etc/sonarr/config.xml
+#     owner: p2p
+#     group: p2p
 
 - name: Sonarr
   docker_container:
     name: sonarr
     image: linuxserver/sonarr:latest
     state: started
-    restart: yes
+    # restart: yes
     volumes:
       - "/etc/sonarr:/config"
+      - "{{ flood_download }}/series:/downloads"
+      - "{{ plex_tv }}:/tv"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        UID: "1003"
-        GID: "911"
+        PUID: "991"
+        PGID: "991"
     networks:
       - name: p2p
+        links:
+          - plex:plex
+          - flood:flood
 
-- name: Configure Jackett for reverse proxy
-  template:
-    src: jackett_config.j2
-    dest: /etc/jackett/ServerConfig.json
+# - name: Configure Jackett for reverse proxy
+#   template:
+#     src: jackett_config.j2
+#     dest: /etc/jackett/ServerConfig.json
 
 - name: Jackett
   docker_container:
     name: jackett
     image: linuxserver/jackett:latest
     state: started
-    restart: yes
+    # restart: yes
     volumes:
       - "/etc/jackett:/config/Jackett"
+      - "{{ torrent_blackhole }}:/downloads"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        UID: "1003"
-        GID: "911"
-    # ports:
-    #   - "8080:9117"
+        PUID: "991"
+        PGID: "991"
+    ports:
+      - "9117:9117"
+    # networks:
+    #   - name: p2p
+
+- name: Tautulli
+  docker_container:
+    name: tautulli
+    image: tautulli/tautulli:latest
+    state: started
+    # restart: yes
+    volumes:
+      - "/etc/tautulli:/config"
+      - "{{ plex_config }}/Library/Application Support/Plex Media Server/Logs:/plex_logs:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        PUID: "991"
+        PGID: "991"
     networks:
       - name: p2p
 
-# - name: Configure Jackett for reverse proxy
-#   lineinfile:
-#     path: /etc/jackett/ServerConfig.json
-#     regexp: '{{ item.regex }}'
-#     line: '{{ item.replace }}'
-#   with_items:
-#     - { regex: '^\s*"BasePathOverride":.*,$', replace: '  "BasePathOverride": "{{ jackett_root }}",' }
-#     - { regex: '^\s*"ProxyUrl":.*,$', replace: '  "ProxyUrl": "{{ domain }}",' }
+- name: Ombi
+  docker_container:
+    name: ombi
+    image: linuxserver/ombi:latest
+    state: started
+    # restart: yes
+    volumes:
+      - "/etc/ombi:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        PUID: "991"
+        PGID: "991"
+    networks:
+      - name: p2p
+        links:
+          - plex:plex
+          - sonarr:sonarr
+          - radarr:radarr
 
 - name: Caddyfile
   template:
@@ -112,15 +178,17 @@
 - name: Reverse-Proxy
   docker_container:
     name: reverse-proxy
-    image: zzrot/alpine-caddy
+    image: abiosoft/caddy
     state: started
     restart: yes
-    # recreate: yes
     # restart_policy: on-failure
     volumes:
       - "/etc/Caddyfile:/etc/Caddyfile"
       - "/var/caddy/srv:/var/www/html"
-      - "/etc/caddy/certs:/root/.caddy/certs"
+      - "/etc/caddy/certs:/root/.caddy"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        ACME_AGREE: true
     ports:
       - "80:80"
       - "443:2015"
@@ -131,3 +199,6 @@
           - radarr:radarr
           - sonarr:sonarr
           - jackett:jackett
+          - plex:plex
+          - tautulli:tautulli
+          - ombi:ombi
