@@ -1,7 +1,5 @@
 "{{ domain }}" {
 				tls {{ user_mail }}
-				fastcgi 	/RPC2 	flood:12345		php
-				basicauth 	/ 		hanks 			hanks
 }
 
 "plex.{{ domain }}" {
@@ -68,10 +66,7 @@
 
 "rtorrent.{{ domain }}" {
 				gzip
-				proxy 		/rutorrent					flood:9443		{
-				transparent
-				}
-				proxy 		/flood						flood:3000		{
+				proxy 		/					flood:443		{
 				transparent
 				}
 				tls {{ user_mail }}

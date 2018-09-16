@@ -5,21 +5,45 @@
     name: flood
     image: romancin/rutorrent-flood:latest
     state: started
-    env:
-        UID: "991"
-        GID: "991"
     tty: yes
-    recreate: yes
+    cpu_shares: 1024
+    env:
+        PUID: "991"
+        PGID: "991"
     volumes:
       - "{{ flood_download }}:/downloads"
       - "{{ flood_config }}:/config"
       - "/etc/localtime:/etc/localtime:ro"
-    # ports:
-    #   - "9443:443"
-    #   - "3000:3000"
-      # - "51415-51415:51415-51415"
     networks:
       - name: p2p
+
+- name: Disable HTTPS for container's NGinx
+  template:
+    src: nginx.j2
+    dest: "{{ flood_config }}/nginx/nginx.conf"
+    owner: p2p
+    group: p2p
+  register: nginx_conf
+
+- debug: var=nginx_conf
+
+- name: Apply Nginx conf
+  notify: restart flood
+  when: nginx_conf is changed
+  meta: flush_handlers
+
+
+
+# - name: Directories hierarchy
+#   file:
+#     path: "/etc/{{ item }}"
+#     state: directory
+#   with_items:
+#     - radarr
+#     - sonarr
+#     - jackett
+#     - ombi
+#     - tautulli
 
 - name: Plex
   docker_container:
@@ -27,6 +51,7 @@
     image: plexinc/pms-docker
     state: started
     hostname: "{{ hostname }}"
+    cpu_shares: 2048
     env:
         PLEX_UID: "992"
         PLEX_GID: "991"
@@ -41,22 +66,13 @@
     networks:
       - name: p2p
 
-- name: Directories hierarchy
-  file:
-    path: "/etc/{{ item }}"
-    state: directory
-  with_items:
-    - radarr
-    - sonarr
-    - jackett
-    - ombi
-    - tautulli
 
 - name: Radarr
   docker_container:
     name: radarr
     image: linuxserver/radarr:latest
     state: started
+    cpu_shares: 1024
     # restart: yes
     # recreate: yes
     volumes:
@@ -77,6 +93,7 @@
     name: sonarr
     image: linuxserver/sonarr:latest
     state: started
+    cpu_shares: 1024
     # restart: yes
     volumes:
       - "/etc/sonarr:/config"
@@ -96,6 +113,7 @@
     name: jackett
     image: linuxserver/jackett:latest
     state: started
+    cpu_shares: 1024
     # restart: yes
     volumes:
       - "/etc/jackett:/config/Jackett"
@@ -114,6 +132,7 @@
     name: tautulli
     image: tautulli/tautulli:latest
     state: started
+    cpu_shares: 1024
     # restart: yes
     volumes:
       - "/etc/tautulli:/config"
@@ -130,6 +149,7 @@
     name: ombi
     image: linuxserver/ombi:latest
     state: started
+    cpu_shares: 1024
     # restart: yes
     volumes:
       - "/etc/ombi:/config"
@@ -154,6 +174,7 @@
     name: reverse-proxy
     image: abiosoft/caddy
     state: started
+    cpu_shares: 1024
     restart: yes
     # restart_policy: on-failure
     volumes:
