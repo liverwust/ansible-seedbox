@@ -1,26 +1,27 @@
 ---
-# flood_root: "/flood"
-flood_root: "/"
-# radarr_root: "/radarr"
+
+# services roots for reverse proxy use
+# UNUSED FOR NOW
+rtorrent_root: "/"
 radarr_root: "/"
-# sonarr_root: "/sonarr"
 sonarr_root: "/"
-# jackett_root: "/jackett"
-jackett_root: ""
-# plex_root: "/plex"
+jackett_root: "/"
 plex_root: "/"
-plex_config: "/var/plex"
-# ombi_root: "/ombi"
 ombi_root: "/"
 
-flood_secret: "floodsecret"
 
-p2p_root: "/var/lib/p2p"
+rtorrent_config: "/etc/rtorrent"
+plex_config: "/var/plex"
 
-flood_download: "{{ p2p_root }}/download"
-flood_config: "/etc/flood"
-
-plex_movies: "/var/lib/plex/movies"
-plex_tv: "/var/lib/plex/tv"
-
+p2p_root: "/var/lib/downloads"
+rtorrent_downloads: "{{ p2p_root }}"
+sonarr_downloads: "{{ rtorrent_downloads }}/tv"
+radarr_downloads: "{{ rtorrent_downloads }}/movies"
 torrent_blackhole: "{{ p2p_root }}/blackhole"
+
+
+plex_medias: "/var/lib/plex"
+plex_movies: "{{ plex_medias }}/movies"
+plex_tv: "{{ plex_medias }}/tv"
+plex_transcode: "{{ plex_medias }}/transcode"
+

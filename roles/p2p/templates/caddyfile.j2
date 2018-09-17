@@ -1,5 +1,10 @@
 "{{ domain }}" {
 				tls {{ user_mail }}
+				proxy		/					netdata:19999	{
+				transparent
+				}
+				basicauth	/					{{ metrics_basicauth_user }} 			{{ metrics_basicauth_password }}
+
 }
 
 "plex.{{ domain }}" {
@@ -7,7 +12,7 @@
 				transparent
 				}
 				tls {{ user_mail }}
-				timeouts none
+				timeouts 2m
 }
 
 "radarr.{{ domain }}" {
@@ -16,7 +21,7 @@
 				transparent
 				}
 				tls {{ user_mail }}
-				timeouts none
+				timeouts 2m
 }
 
 "sonarr.{{ domain }}" {
@@ -25,16 +30,7 @@
 				transparent
 				}
 				tls {{ user_mail }}
-				timeouts none
-}
-
-"jackett.{{ domain }}" {
-				gzip
-				proxy 		/					jackett:9117		{
-				transparent
-				}
-				tls {{ user_mail }}
-				timeouts none
+				timeouts 2m
 }
 
 "ombi.{{ domain }}" {
@@ -43,16 +39,7 @@
 				transparent
 				}
 				tls {{ user_mail }}
-				timeouts none
-}
-
-"flood.{{ domain }}" {
-				gzip
-				proxy 		/					flood:3000		{
-				transparent
-				}
-				tls {{ user_mail }}
-				timeouts none
+				timeouts 2m
 }
 
 "tautulli.{{ domain }}" {
@@ -61,14 +48,15 @@
 				transparent
 				}
 				tls {{ user_mail }}
-				timeouts none
+				timeouts 2m
 }
 
-"rtorrent.{{ domain }}" {
-				gzip
-				proxy 		/					flood:443		{
+"rtorrent.{{ domain }}"  {
+				basicauth	/					{{ rutorrent_basicauth_user }} 			{{ rutorrent_basicauth_password }}
+				proxy 		/					rtorrent:80		{
 				transparent
 				}
+
 				tls {{ user_mail }}
-				timeouts none
+				timeouts 2m
 }

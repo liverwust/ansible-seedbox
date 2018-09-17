@@ -1,68 +1,58 @@
 ---
 
-- name: Launch Rtorrent-Flood
+- file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ rtorrent_downloads }}"
+    - "{{ sonarr_downloads }}"
+    - "{{ radarr_downloads }}"
+    - "{{ plex_movies }}"
+    - "{{ plex_tv }}"
+
+- name: Containers internal network
+  docker_network:
+    name: p2p
+
+- name: Launch Rtorrent
   docker_container:
-    name: flood
-    image: romancin/rutorrent-flood:latest
+    name: rtorrent
+    image: diameter/rtorrent-rutorrent:stable
     state: started
-    tty: yes
-    cpu_shares: 1024
     env:
-        PUID: "991"
-        PGID: "991"
+        USR_ID: "{{ p2p_uid }}"
+        GRP_ID: "{{ group_gid }}"
+        NOIPV6: 1
+    ports:
+      - "49160:49160"
+      - "49161:49161"
     volumes:
-      - "{{ flood_download }}:/downloads"
-      - "{{ flood_config }}:/config"
+      - "{{ rtorrent_downloads }}:/downloads"
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - name: p2p
 
-- name: Disable HTTPS for container's NGinx
-  template:
-    src: nginx.j2
-    dest: "{{ flood_config }}/nginx/nginx.conf"
-    owner: p2p
-    group: p2p
-  register: nginx_conf
-
-- debug: var=nginx_conf
-
-- name: Apply Nginx conf
-  notify: restart flood
-  when: nginx_conf is changed
-  meta: flush_handlers
-
-
-
-# - name: Directories hierarchy
-#   file:
-#     path: "/etc/{{ item }}"
-#     state: directory
-#   with_items:
-#     - radarr
-#     - sonarr
-#     - jackett
-#     - ombi
-#     - tautulli
-
 - name: Plex
   docker_container:
     name: plex
-    image: plexinc/pms-docker
+    image: plexinc/pms-docker:latest
     state: started
-    hostname: "{{ hostname }}"
-    cpu_shares: 2048
+    recreate: yes
     env:
-        PLEX_UID: "992"
-        PLEX_GID: "991"
+        PLEX_UID: "{{ plex_uid }}"
+        PLEX_GID: "{{ group_gid }}"
         PLEX_CLAIM: "{{ plex_claim_token }}"
         ADVERTISE_IP: "{{ ansible_host }}"
     volumes:
       - "{{ plex_movies }}:/data/movies"
       - "{{ plex_tv }}:/data/tv"
-      - "/var/lib/plex/transcode:/transcode"
+      - "{{ plex_transcode }}:/transcode"
       - "{{ plex_config }}:/config"
       - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "32400:32400"
     networks:
       - name: p2p
 
@@ -72,58 +62,53 @@
     name: radarr
     image: linuxserver/radarr:latest
     state: started
-    cpu_shares: 1024
-    # restart: yes
-    # recreate: yes
     volumes:
       - "/etc/radarr:/config"
-      - "{{ flood_download }}/movies:/downloads"
+      - "{{ radarr_downloads }}:/downloads/movies"
       - "{{ plex_movies }}:/movies"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "991"
-        PGID: "991"
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
     networks:
       - name: p2p
         links:
           - plex:plex
+          - rtorrent:rtorrent
 
 - name: Sonarr
   docker_container:
     name: sonarr
     image: linuxserver/sonarr:latest
     state: started
-    cpu_shares: 1024
-    # restart: yes
     volumes:
       - "/etc/sonarr:/config"
-      - "{{ flood_download }}/series:/downloads"
+      - "{{ sonarr_downloads }}:/downloads/tv"
       - "{{ plex_tv }}:/tv"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "991"
-        PGID: "991"
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
     networks:
       - name: p2p
         links:
           - plex:plex
+          - rtorrent:rtorrent
 
 - name: Jackett
   docker_container:
     name: jackett
     image: linuxserver/jackett:latest
     state: started
-    cpu_shares: 1024
-    # restart: yes
     volumes:
       - "/etc/jackett:/config/Jackett"
       - "{{ torrent_blackhole }}:/downloads"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "991"
-        PGID: "991"
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
     ports:
-      - "9117:9117"
+      - "8080:9117"
     # networks:
     #   - name: p2p
 
@@ -132,15 +117,13 @@
     name: tautulli
     image: tautulli/tautulli:latest
     state: started
-    cpu_shares: 1024
-    # restart: yes
     volumes:
       - "/etc/tautulli:/config"
       - "{{ plex_config }}/Library/Application Support/Plex Media Server/Logs:/plex_logs:ro"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "991"
-        PGID: "991"
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
     networks:
       - name: p2p
 
@@ -149,20 +132,30 @@
     name: ombi
     image: linuxserver/ombi:latest
     state: started
-    cpu_shares: 1024
-    # restart: yes
     volumes:
       - "/etc/ombi:/config"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "991"
-        PGID: "991"
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
     networks:
       - name: p2p
         links:
           - plex:plex
           - sonarr:sonarr
           - radarr:radarr
+
+- name: Netdata
+  docker_container:
+    name: netdata
+    image: firehol/netdata:latest
+    capabilities: "SYS_PTRACE"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - name: p2p
 
 - name: Caddyfile
   template:
@@ -174,9 +167,7 @@
     name: reverse-proxy
     image: abiosoft/caddy
     state: started
-    cpu_shares: 1024
-    restart: yes
-    # restart_policy: on-failure
+    # restart: yes
     volumes:
       - "/etc/Caddyfile:/etc/Caddyfile"
       # - "/var/caddy/srv:/var/www/html"
@@ -186,14 +177,14 @@
         ACME_AGREE: true
     ports:
       - "80:80"
-      - "443:2015"
+      - "443:443"
     networks:
       - name: p2p
         links:
-          - flood:flood
+          - rtorrent:rtorrent
           - radarr:radarr
           - sonarr:sonarr
-          - jackett:jackett
           - plex:plex
           - tautulli:tautulli
           - ombi:ombi
+          - netdata:netdata

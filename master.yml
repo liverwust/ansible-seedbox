@@ -1,6 +1,6 @@
 ---
   
-- hosts: aws
+- hosts: all
   roles:
     - { role: config }
     - { role: p2p }
