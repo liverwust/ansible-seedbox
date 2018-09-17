@@ -184,7 +184,7 @@
     name: reverse-proxy
     image: abiosoft/caddy
     state: started
-    # restart: yes
+    restart: yes
     volumes:
       - "/etc/Caddyfile:/etc/Caddyfile"
       # - "/var/caddy/srv:/var/www/html"
