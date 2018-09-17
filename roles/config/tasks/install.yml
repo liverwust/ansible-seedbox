@@ -38,6 +38,11 @@
   with_file:
     - "~/.ssh/id_rsa.pub"
 
+- name: Upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
 - name: Install Packages
   yum:
     name: "{{ packages }}"

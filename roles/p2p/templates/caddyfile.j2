@@ -33,6 +33,15 @@
 				timeouts 2m
 }
 
+"bazarr.{{ domain }}" {
+				gzip
+				proxy 		/					bazarr:6767		{
+				transparent
+				}
+				tls {{ user_mail }}
+				timeouts 2m
+}
+
 "ombi.{{ domain }}" {
 				gzip
 				proxy 		/					ombi:3579		{

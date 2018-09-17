@@ -12,6 +12,7 @@ ombi_root: "/"
 
 rtorrent_config: "/etc/rtorrent"
 plex_config: "/var/plex"
+bazarr_config: "/etc/bazarr"
 
 p2p_root: "/var/lib/downloads"
 rtorrent_downloads: "{{ p2p_root }}"

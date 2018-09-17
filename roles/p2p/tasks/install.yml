@@ -11,6 +11,7 @@
     - "{{ radarr_downloads }}"
     - "{{ plex_movies }}"
     - "{{ plex_tv }}"
+    - "{{ bazarr_config }}"
 
 - name: Containers internal network
   docker_network:
@@ -39,7 +40,6 @@
     name: plex
     image: plexinc/pms-docker:latest
     state: started
-    recreate: yes
     env:
         PLEX_UID: "{{ plex_uid }}"
         PLEX_GID: "{{ group_gid }}"
@@ -73,7 +73,6 @@
     networks:
       - name: p2p
         links:
-          - plex:plex
           - rtorrent:rtorrent
 
 - name: Sonarr
@@ -92,8 +91,26 @@
     networks:
       - name: p2p
         links:
-          - plex:plex
           - rtorrent:rtorrent
+
+- name: Bazarr
+  docker_container:
+    name: bazarr
+    image: morpheus65535/bazarr:latest
+    state: started
+    env:
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
+    volumes:
+      - "{{ plex_movies }}:/movies"
+      - "{{ plex_tv }}:/tv"
+      - "{{ bazarr_config }}:/bazarr/data"
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - name: p2p
+        links:
+          - sonarr:sonarr
+          - radarr:radarr
 
 - name: Jackett
   docker_container:
@@ -185,6 +202,7 @@
           - radarr:radarr
           - sonarr:sonarr
           - plex:plex
+          - bazarr:bazarr
           - tautulli:tautulli
           - ombi:ombi
           - netdata:netdata
