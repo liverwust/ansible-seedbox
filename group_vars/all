@@ -2,6 +2,12 @@
 ansible_become: yes
 user_mail: "self_signed"
 
+ansible_host: "0.0.0.0"
+ansible_user: "deployer"
+ansible_ssh_private_key_file: "id_rsa"
+domain: "domain.com"
+hostname: "host"
+
 group_name: "p2p"
 group_gid: "991"
 
@@ -11,3 +17,13 @@ p2p_uid: "991"
 plex_user: "plex"
 plex_uid: "992"
 
+plex_claim_token: "claim-xxxxxxxxxxxxxxx"   #   https://plex.tv/claim
+
+rutorrent_basicauth_user: "admin"
+rutorrent_basicauth_password: "admin"
+
+metrics_basicauth_user: "admin"
+metrics_basicauth_password: "admin"
+
+files_basicauth_user: "admin"
+files_basicauth_password: "admin"

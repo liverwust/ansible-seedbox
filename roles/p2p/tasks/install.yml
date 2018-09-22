@@ -12,6 +12,7 @@
     - "{{ plex_movies }}"
     - "{{ plex_tv }}"
     - "{{ bazarr_config }}"
+    - "{{ exposed_folder }}"
 
 - name: Containers internal network
   docker_network:
@@ -20,17 +21,20 @@
 - name: Launch Rtorrent
   docker_container:
     name: rtorrent
-    image: diameter/rtorrent-rutorrent:stable
+    image: linuxserver/rutorrent:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     env:
-        USR_ID: "{{ p2p_uid }}"
-        GRP_ID: "{{ group_gid }}"
-        NOIPV6: 1
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
     ports:
-      - "49160:49160"
-      - "49161:49161"
+      - "51413:51413"
+      - "6881:6881"
     volumes:
-      - "{{ rtorrent_downloads }}:/downloads"
+      - "{{ rtorrent_config }}:/config"
+      - "{{ rtorrent_downloads }}:/p2p/downloads"
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - name: p2p
@@ -40,6 +44,9 @@
     name: plex
     image: plexinc/pms-docker:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     env:
         PLEX_UID: "{{ plex_uid }}"
         PLEX_GID: "{{ group_gid }}"
@@ -62,10 +69,13 @@
     name: radarr
     image: linuxserver/radarr:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     volumes:
       - "/etc/radarr:/config"
-      - "{{ radarr_downloads }}:/downloads/movies"
-      - "{{ plex_movies }}:/movies"
+      - "{{ medias_root }}:/p2p"
+      # - "{{ plex_movies }}:/movies"
       - "/etc/localtime:/etc/localtime:ro"
     env:
         PUID: "{{ p2p_uid }}"
@@ -80,10 +90,13 @@
     name: sonarr
     image: linuxserver/sonarr:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     volumes:
       - "/etc/sonarr:/config"
-      - "{{ sonarr_downloads }}:/downloads/tv"
-      - "{{ plex_tv }}:/tv"
+      - "{{ medias_root }}:/p2p"
+      # - "{{ plex_tv }}:/tv"
       - "/etc/localtime:/etc/localtime:ro"
     env:
         PUID: "{{ p2p_uid }}"
@@ -98,6 +111,9 @@
     name: bazarr
     image: morpheus65535/bazarr:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     env:
         PUID: "{{ p2p_uid }}"
         PGID: "{{ group_gid }}"
@@ -117,6 +133,9 @@
     name: jackett
     image: linuxserver/jackett:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     volumes:
       - "/etc/jackett:/config/Jackett"
       - "{{ torrent_blackhole }}:/downloads"
@@ -134,6 +153,9 @@
     name: tautulli
     image: tautulli/tautulli:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     volumes:
       - "/etc/tautulli:/config"
       - "{{ plex_config }}/Library/Application Support/Plex Media Server/Logs:/plex_logs:ro"
@@ -149,6 +171,9 @@
     name: ombi
     image: linuxserver/ombi:latest
     state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     volumes:
       - "/etc/ombi:/config"
       - "/etc/localtime:/etc/localtime:ro"
@@ -166,11 +191,28 @@
   docker_container:
     name: netdata
     image: firehol/netdata:latest
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
     capabilities: "SYS_PTRACE"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - name: p2p
+
+- name: Portainer
+  docker_container:
+    name: portainer
+    image: portainer/portainer:latest
+    hostname: portainer
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/portainer:/data"
     networks:
       - name: p2p
 
@@ -184,10 +226,16 @@
     name: reverse-proxy
     image: abiosoft/caddy
     state: started
-    restart: yes
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    # restart: yes
     volumes:
       - "/etc/Caddyfile:/etc/Caddyfile"
-      # - "/var/caddy/srv:/var/www/html"
+      - "/var/caddy/srv:/var/www/html"
+      - "{{ exposed_folder }}:/var/www/files/others"
+      - "{{ plex_movies }}:/var/www/files/movies"
+      - "{{ plex_tv }}:/var/www/files/tv"
       - "/etc/caddy/certs:/root/.caddy"
       - "/etc/localtime:/etc/localtime:ro"
     env:
@@ -195,6 +243,7 @@
     ports:
       - "80:80"
       - "443:443"
+      # - "2015:2015"
     networks:
       - name: p2p
         links:
@@ -206,3 +255,4 @@
           - tautulli:tautulli
           - ombi:ombi
           - netdata:netdata
+          - portainer:portainer

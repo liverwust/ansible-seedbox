@@ -1,18 +1,40 @@
 "{{ domain }}" {
+				gzip
+				root /var/www/html
 				tls {{ user_mail }}
+}
+
+"metrics.{{ domain }}" {
+				gzip
+				basicauth	/					{{ metrics_basicauth_user }} 	{{ metrics_basicauth_password }}
 				proxy		/					netdata:19999	{
 				transparent
 				}
-				basicauth	/					{{ metrics_basicauth_user }} 			{{ metrics_basicauth_password }}
-
+				tls {{ user_mail }}
 }
 
 "plex.{{ domain }}" {
 				proxy 		/					plex:32400		{
 				transparent
 				}
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
+}
+
+"files.{{ domain }}"	{
+				gzip
+				basicauth	/					{{ files_basicauth_user }}		{{ files_basicauth_password }}
+				root		/var/www/files
+				browse
+				tls 		{{ user_mail }}
+}
+
+"portainer.{{ domain }}" 	{
+				proxy		/					portainer:9000	{
+				transparent
+				}
+				timeouts 2m
+				tls {{ user_mail }}
 }
 
 "radarr.{{ domain }}" {
@@ -20,8 +42,8 @@
 				proxy 		/					radarr:7878		{
 				transparent
 				}
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
 }
 
 "sonarr.{{ domain }}" {
@@ -29,8 +51,8 @@
 				proxy 		/					sonarr:8989		{
 				transparent
 				}
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
 }
 
 "bazarr.{{ domain }}" {
@@ -38,8 +60,8 @@
 				proxy 		/					bazarr:6767		{
 				transparent
 				}
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
 }
 
 "ombi.{{ domain }}" {
@@ -47,8 +69,8 @@
 				proxy 		/					ombi:3579		{
 				transparent
 				}
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
 }
 
 "tautulli.{{ domain }}" {
@@ -56,16 +78,16 @@
 				proxy 		/					tautulli:8181		{
 				transparent
 				}
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
 }
 
 "rtorrent.{{ domain }}"  {
-				basicauth	/					{{ rutorrent_basicauth_user }} 			{{ rutorrent_basicauth_password }}
+				gzip
+				basicauth	/					{{ rutorrent_basicauth_user }} 		{{ rutorrent_basicauth_password }}
 				proxy 		/					rtorrent:80		{
 				transparent
 				}
-
-				tls {{ user_mail }}
 				timeouts 2m
+				tls {{ user_mail }}
 }

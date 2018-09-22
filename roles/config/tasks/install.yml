@@ -42,13 +42,14 @@
   yum:
     name: '*'
     state: latest
+    exclude: kernel*
 
 - name: Install Packages
   yum:
     name: "{{ packages }}"
   vars:
     packages:
-      - docker
+      - docker-ce
       - python2-pip
 
 - name: Start dockerd
