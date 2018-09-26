@@ -22,10 +22,10 @@
 }
 
 "files.{{ domain }}"	{
-				gzip
 				basicauth	/					{{ files_basicauth_user }}		{{ files_basicauth_password }}
 				root		/var/www/files
 				browse
+				timeouts none
 				tls 		{{ user_mail }}
 }
 

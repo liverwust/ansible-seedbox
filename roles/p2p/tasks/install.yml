@@ -23,9 +23,13 @@
     name: rtorrent
     image: linuxserver/rutorrent:latest
     state: started
+    tty: yes
+    # restart: yes
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
+    cpu_period: 100000
+    cpu_quota: 150000
     env:
         PUID: "{{ p2p_uid }}"
         PGID: "{{ group_gid }}"
@@ -109,7 +113,7 @@
 - name: Bazarr
   docker_container:
     name: bazarr
-    image: morpheus65535/bazarr:latest
+    image: linuxserver/bazarr:latest
     state: started
     pull: yes
     restart_policy: on-failure
@@ -120,7 +124,7 @@
     volumes:
       - "{{ plex_movies }}:/movies"
       - "{{ plex_tv }}:/tv"
-      - "{{ bazarr_config }}:/bazarr/data"
+      - "{{ bazarr_config }}:/config"
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - name: p2p
@@ -224,7 +228,7 @@
 - name: Reverse-Proxy
   docker_container:
     name: reverse-proxy
-    image: abiosoft/caddy
+    image: abiosoft/caddy:latest
     state: started
     pull: yes
     restart_policy: on-failure
