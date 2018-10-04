@@ -55,6 +55,14 @@
 				tls {{ user_mail }}
 }
 
+"jackett.{{ domain }}" {
+				gzip
+				proxy 		/					jackett:9117		{
+				transparent
+				}
+				tls {{ user_mail }}
+}
+
 "bazarr.{{ domain }}" {
 				gzip
 				proxy 		/					bazarr:6767		{

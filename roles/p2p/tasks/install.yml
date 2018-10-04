@@ -67,6 +67,24 @@
     networks:
       - name: p2p
 
+- name: Jackett
+  docker_container:
+    name: jackett
+    image: linuxserver/jackett:latest
+    state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/etc/jackett:/config/Jackett"
+      - "{{ torrent_blackhole }}:/downloads"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+        PUID: "{{ p2p_uid }}"
+        PGID: "{{ group_gid }}"
+    networks:
+      - name: p2p
+
 
 - name: Radarr
   docker_container:
@@ -88,6 +106,7 @@
       - name: p2p
         links:
           - rtorrent:rtorrent
+          - jackett:jackett
 
 - name: Sonarr
   docker_container:
@@ -109,6 +128,7 @@
       - name: p2p
         links:
           - rtorrent:rtorrent
+          - jackett:jackett
 
 - name: Bazarr
   docker_container:
@@ -131,26 +151,6 @@
         links:
           - sonarr:sonarr
           - radarr:radarr
-
-- name: Jackett
-  docker_container:
-    name: jackett
-    image: linuxserver/jackett:latest
-    state: started
-    pull: yes
-    restart_policy: on-failure
-    restart_retries: 2
-    volumes:
-      - "/etc/jackett:/config/Jackett"
-      - "{{ torrent_blackhole }}:/downloads"
-      - "/etc/localtime:/etc/localtime:ro"
-    env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
-    ports:
-      - "8080:9117"
-    # networks:
-    #   - name: p2p
 
 - name: Tautulli
   docker_container:
