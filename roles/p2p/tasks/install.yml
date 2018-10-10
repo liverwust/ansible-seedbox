@@ -224,6 +224,14 @@
   template:
     src: caddyfile.j2
     dest: /etc/Caddyfile
+  register: caddyfile
+
+- set_fact:
+    restart_caddy: "yes"
+  when: caddyfile is changed
+
+- debug:
+    msg: "Restart caddy: {{ restart_caddy }}"
 
 - name: Reverse-Proxy
   docker_container:
@@ -233,7 +241,7 @@
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
-    # restart: yes
+    restart: "{{ restart_caddy }}"
     volumes:
       - "/etc/Caddyfile:/etc/Caddyfile"
       - "/var/caddy/srv:/var/www/html"
@@ -260,3 +268,8 @@
           - ombi:ombi
           - netdata:netdata
           - portainer:portainer
+
+- name: Cleaning unused images and volumes
+  shell: |
+          docker image prune -af
+          docker volume prune -f
