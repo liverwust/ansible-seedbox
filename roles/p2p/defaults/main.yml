@@ -1,2 +1,10 @@
 ---
 restart_caddy: "no"
+
+plex_docker_ip: "172.18.0.100"
+radarr_docker_ip: "172.18.0.100"
+sonarr_docker_ip: "172.18.0.100"
+jackett_docker_ip: "172.18.0.100"
+ombi_docker_ip: "172.18.0.100"
+rtorrent_docker_ip: "172.18.0.100"
+bazarr_docker_ip: "172.18.0.100"

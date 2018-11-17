@@ -1,28 +1,14 @@
 ---
-
-- file:
-    path: "{{ item }}"
-    state: directory
-    owner: p2p
-    group: p2p
-  with_items:
-    - "{{ rtorrent_downloads }}"
-    - "{{ sonarr_downloads }}"
-    - "{{ radarr_downloads }}"
-    - "{{ plex_movies }}"
-    - "{{ plex_tv }}"
-    - "{{ bazarr_config }}"
-    - "{{ exposed_folder }}"
-
 - name: Containers internal network
   docker_network:
     name: p2p
 
-- name: Launch Rtorrent
+- name: Rtorrent
   docker_container:
     name: rtorrent
-    image: linuxserver/rutorrent:latest
+    image: xataz/rtorrent-rutorrent:latest
     state: started
+    hostname: rtorrent
     tty: yes
     # restart: yes
     pull: yes
@@ -31,13 +17,15 @@
     cpu_period: 100000
     cpu_quota: 150000
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+        UID: "{{ p2p_uid }}"
+        GID: "{{ group_gid }}"
     ports:
-      - "51413:51413"
-      - "6881:6881"
+      # - "51413:51413"
+      - "45000:45000"
+      # - "6881:6881"
     volumes:
       - "{{ rtorrent_config }}:/config"
+      - "{{ rtorrent_config }}/rtorrent/sessions:/data/.session"
       - "{{ rtorrent_downloads }}:/p2p/downloads"
       - "/etc/localtime:/etc/localtime:ro"
     networks:
@@ -48,6 +36,7 @@
     name: plex
     image: plexinc/pms-docker:latest
     state: started
+    hostname: plex
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -66,12 +55,14 @@
       - "32400:32400"
     networks:
       - name: p2p
+        ipv4_address: "{{ plex_docker_ip }}"
 
 - name: Jackett
   docker_container:
     name: jackett
     image: linuxserver/jackett:latest
     state: started
+    hostname: jackett
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -91,6 +82,7 @@
     name: radarr
     image: linuxserver/radarr:latest
     state: started
+    hostname: radarr
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -113,6 +105,7 @@
     name: sonarr
     image: linuxserver/sonarr:latest
     state: started
+    hostname: sonarr
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -135,6 +128,7 @@
     name: bazarr
     image: linuxserver/bazarr:latest
     state: started
+    hostname: bazarr
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -157,6 +151,7 @@
     name: tautulli
     image: tautulli/tautulli:latest
     state: started
+    hostname: tautulli
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -175,6 +170,7 @@
     name: ombi
     image: linuxserver/ombi:latest
     state: started
+    hostname: ombi
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -196,13 +192,17 @@
     name: netdata
     image: firehol/netdata:latest
     pull: yes
+    hostname: netdata
     restart_policy: on-failure
     restart_retries: 2
     capabilities: "SYS_PTRACE"
+    env:
+      PUID: "{{ netdata_uid }}"
+      PGID: 989     # Docker GID for socket permissions
     volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "/proc:/host/proc:ro"
+      - "/sys:/host/sys:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - name: p2p
 
@@ -238,6 +238,7 @@
     name: reverse-proxy
     image: abiosoft/caddy:latest
     state: started
+    hostname: caddy
     pull: yes
     restart_policy: on-failure
     restart_retries: 2

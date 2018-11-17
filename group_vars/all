@@ -17,6 +17,9 @@ p2p_uid: "991"
 plex_user: "plex"
 plex_uid: "992"
 
+netdata_user: "netdata"
+netdata_uid: "995"
+
 plex_claim_token: "claim-xxxxxxxxxxxxxxx"   #   https://plex.tv/claim
 
 rutorrent_basicauth_user: "admin"

@@ -93,7 +93,7 @@
 "rtorrent.{{ domain }}"  {
 				gzip
 				basicauth	/					{{ rutorrent_basicauth_user }} 		{{ rutorrent_basicauth_password }}
-				proxy 		/					rtorrent:80		{
+				proxy 		/					rtorrent:8080		{
 				transparent
 				}
 				timeouts 2m

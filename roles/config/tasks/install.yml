@@ -26,10 +26,12 @@
     state: present
     createhome: "{{ item.createhome }}"
     uid: "{{ item.uid }}"
+    shell: "{{ item.shell }}"
   with_items:
-    - { name: "deployer", groups: "wheel", append: yes, createhome: yes , uid: "1000" }
-    - { name: "{{ p2p_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ p2p_uid }}" }
-    - { name: "{{ plex_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ plex_uid }}" }
+    - { name: "deployer", groups: "wheel", append: yes, createhome: yes , uid: "1000", shell: "/bin/bash" }
+    - { name: "{{ p2p_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ p2p_uid }}", shell: "/bin/bash" }
+    - { name: "{{ plex_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ plex_uid }}", shell: "/sbin/nologin" }
+    - { name: "{{ netdata_user }}", groups: "docker", append: yes, createhome: no, uid: "{{ netdata_uid }}", shell: "/sbin/nologin" }
 
 - name: Set up authorized keys for the deployer user
   authorized_key: 
@@ -38,13 +40,13 @@
   with_file:
     - "~/.ssh/id_rsa.pub"
 
-- name: Upgrade all packages
+- name: Upgrade all packages except kernel
   yum:
     name: '*'
     state: latest
     exclude: kernel*
 
-- name: Install Packages
+- name: Install necessary packages
   yum:
     name: "{{ packages }}"
   vars:
@@ -60,3 +62,18 @@
 - name: Install docker python interface
   pip:
     name: docker
+
+- name: Directories permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ rtorrent_downloads }}"
+    - "{{ sonarr_downloads }}"
+    - "{{ radarr_downloads }}"
+    - "{{ plex_movies }}"
+    - "{{ plex_tv }}"
+    - "{{ bazarr_config }}"
+    - "{{ exposed_folder }}"
