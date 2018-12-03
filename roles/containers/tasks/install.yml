@@ -12,7 +12,7 @@
     - "{{ plex_movies }}"
     - "{{ plex_tv }}"
     - "{{ bazarr_config }}"
-    # - "{{ exposed_folder }}"
+    - "{{ exposed_folder }}"
 
 - name: Setting containers
   include_tasks: "{{ item }}.yml"
@@ -30,8 +30,4 @@
     - bazarr
     - lighttpd
     - caddy
-
-# - name: Cleaning unused images and volumes
-#   shell: |
-#     docker image prune -af
-#     docker volume prune -f
+    - watchtower
