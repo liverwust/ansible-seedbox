@@ -8,6 +8,8 @@ ansible_ssh_private_key_file: "id_rsa"
 domain: "domain.com"
 hostname: "host"
 
+traefik_dir: "/var/www/traefik"
+
 group_name: "p2p"
 group_gid: "991"
 
@@ -19,6 +21,11 @@ plex_uid: "992"
 
 netdata_user: "netdata"
 netdata_uid: "995"
+
+ovh_endpoint: "ovh-eu"
+ovh_application_key: "xxxxxxxxxxxxxxx"
+ovh_application_secret: "xxxxxxxxxxxxxxx"
+ovh_consumer_key: "xxxxxxxxxxxxxxx"
 
 plex_claim_token: "claim-xxxxxxxxxxxxxxx"   #   https://plex.tv/claim
 

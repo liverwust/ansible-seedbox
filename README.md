@@ -3,7 +3,7 @@
 This is my personnal script for my seedbox installation and auto-update.
 
 ## Current services
-All services are served through [Caddy](https://github.com/mholt/caddy) acting as a secured reverse-proxy.
+All services are served through [Traefik](https://traefik.io) acting as a reverse-proxy with auto TLS certificates renewal from [LetsEncrypt](https://letsencrypt.org/).
 
 | Logo                                                                                                                                                           | Service   | Link                                                                              | Reverse-proxy      |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------- | ------------------ |
@@ -21,5 +21,9 @@ All services are served through [Caddy](https://github.com/mholt/caddy) acting a
 ## Requirements
 
 * You would need to define some variable according to your own hosts in `host_vars`.
+
+* Wildcard-domains needs a DNS Challenge. You can configure your own in `roles/p2p/templates/traefik.toml.j2`
+
+* The RAID0 configuration and partitions definition is not included in this script.
 
 * This is also a good idea to define separate partitions for you media files and your `$DOCKER_HOME` (usually `/var/lib/docker`).
