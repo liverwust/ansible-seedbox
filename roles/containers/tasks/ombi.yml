@@ -1,0 +1,27 @@
+---
+- name: Ombi
+  docker_container:
+    name: ombi
+    image: linuxserver/ombi:latest
+    state: started
+    hostname: ombi
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/etc/ombi:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
+    networks:
+      - name: p2p
+        links:
+          - plex:plex
+          - sonarr:sonarr
+          - radarr:radarr
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:ombi.{{ domain }}"
+      traefik.basic.port: "3579"

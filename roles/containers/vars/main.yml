@@ -1,15 +1,4 @@
 ---
-
-# services roots for reverse proxy use
-# UNUSED FOR NOW
-rtorrent_root: "/"
-radarr_root: "/"
-sonarr_root: "/"
-jackett_root: "/"
-plex_root: "/"
-ombi_root: "/"
-
-
 rtorrent_config: "/etc/rtorrent"
 plex_config: "/var/plex"
 bazarr_config: "/etc/bazarr"
@@ -26,4 +15,3 @@ plex_medias: "{{ medias_root }}/plex"
 plex_movies: "{{ plex_medias }}/movies"
 plex_tv: "{{ plex_medias }}/tv"
 plex_transcode: "{{ plex_medias }}/transcode"
-

@@ -1,0 +1,35 @@
+---
+- name: Directories permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ rtorrent_downloads }}"
+    - "{{ sonarr_downloads }}"
+    - "{{ radarr_downloads }}"
+    - "{{ plex_movies }}"
+    - "{{ plex_tv }}"
+    - "{{ bazarr_config }}"
+    - "{{ exposed_folder }}"
+
+- name: Setting containers
+  include_tasks: "{{ item }}.yml"
+  with_items:
+    - traefik
+    - portainer
+    - netdata
+    - plex
+    - rtorrent
+    - jackett
+    - sonarr
+    - radarr
+    - ombi
+    - tautulli
+    - bazarr
+
+# - name: Cleaning unused images and volumes
+#   shell: |
+#     docker image prune -af
+#     docker volume prune -f

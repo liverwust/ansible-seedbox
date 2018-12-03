@@ -1,0 +1,27 @@
+---
+- name: Radarr
+  docker_container:
+    name: radarr
+    image: linuxserver/radarr:latest
+    state: started
+    hostname: radarr
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/etc/radarr:/config"
+      - "{{ medias_root }}:/p2p"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
+    networks:
+      - name: p2p
+        links:
+          - rtorrent:rtorrent
+          - jackett:jackett
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:radarr.{{ domain }}"
+      traefik.basic.port: "7878"

@@ -9,6 +9,12 @@ defaultEntryPoints = ["https","http"]
     address = ":443"
   [entryPoints.https.tls]
   
+  [entryPoints.traefik]
+    address = ":8080"
+    [entryPoints.traefik.auth]
+      [entryPoints.traefik.auth.basic]
+        users = ["{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"]
+  
 
 [acme]
   email = "{{ user_mail }}"

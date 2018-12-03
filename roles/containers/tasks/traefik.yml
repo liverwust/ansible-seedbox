@@ -1,0 +1,43 @@
+---
+- name: Ensures traefik dir exists
+  file:
+    path: "{{ traefik_dir }}"
+    state: directory
+
+- name: Ensures acme.json file exists
+  file:
+    path: "{{ traefik_dir }}/acme.json"
+    state: touch
+    mode: 0600
+
+- name: Adding traefik.toml file
+  template:
+    src: traefik/traefik.toml.j2
+    dest: "{{ traefik_dir }}/traefik.toml"
+    mode: 0600
+
+- name: Create the traefik container
+  docker_container:
+    name: traefik
+    image: traefik
+    restart_policy: unless-stopped
+    networks:
+      - name: p2p
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "{{ traefik_dir }}/traefik.toml:/etc/traefik/traefik.toml"
+      - "{{ traefik_dir }}/acme.json:/acme.json"
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      traefik.frontend.rule: "Host:traefik.{{ domain }}"
+      traefik.docker.network: "p2p"
+      traefik.port: "8080"
+      traefik.enable: "true"
+      # traefik.frontend.auth.basic.users: "{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"
+    env:
+      OVH_ENDPOINT: "{{ ovh_endpoint }}"
+      OVH_APPLICATION_KEY: "{{ ovh_application_key }}"
+      OVH_APPLICATION_SECRET: "{{ ovh_application_secret }}"
+      OVH_CONSUMER_KEY: "{{ ovh_consumer_key }}"

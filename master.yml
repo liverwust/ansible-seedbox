@@ -3,4 +3,5 @@
 - hosts: all
   roles:
     - { role: config }
-    - { role: p2p }
+    - { role: docker }
+    - { role: containers }

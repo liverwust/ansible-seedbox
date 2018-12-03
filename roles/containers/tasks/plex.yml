@@ -1,0 +1,30 @@
+---
+- name: Plex
+  docker_container:
+    name: plex
+    image: plexinc/pms-docker:latest
+    state: started
+    hostname: plex
+    pull: yes
+    restart_policy: unless-stopped
+    env:
+      PLEX_UID: "{{ plex_uid }}"
+      PLEX_GID: "{{ group_gid }}"
+      PLEX_CLAIM: "{{ plex_claim_token }}"
+      ADVERTISE_IP: "{{ ansible_host }}"
+    volumes:
+      - "{{ plex_movies }}:/data/movies"
+      - "{{ plex_tv }}:/data/tv"
+      - "{{ plex_transcode }}:/transcode"
+      - "{{ plex_config }}:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "32400:32400"
+    networks:
+      - name: p2p
+        ipv4_address: "{{ plex_docker_ip }}"
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:plex.{{ domain }}"
+      traefik.basic.port: "32400"

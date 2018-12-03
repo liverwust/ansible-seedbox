@@ -1,0 +1,24 @@
+---
+- name: Jackett
+  docker_container:
+    name: jackett
+    image: linuxserver/jackett:latest
+    state: started
+    hostname: jackett
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/etc/jackett:/config/Jackett"
+      - "{{ torrent_blackhole }}:/downloads"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
+    networks:
+      - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:jackett.{{ domain }}"
+      traefik.basic.port: "9117"

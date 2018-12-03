@@ -1,0 +1,24 @@
+---
+- name: Tautulli
+  docker_container:
+    name: tautulli
+    image: tautulli/tautulli:latest
+    state: started
+    hostname: tautulli
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/etc/tautulli:/config"
+      - "{{ plex_config }}/Library/Application Support/Plex Media Server/Logs:/plex_logs:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    env:
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
+    networks:
+      - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:tautulli.{{ domain }}"
+      traefik.basic.port: "8181"

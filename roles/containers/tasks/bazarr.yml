@@ -1,0 +1,28 @@
+---
+- name: Bazarr
+  docker_container:
+    name: bazarr
+    image: linuxserver/bazarr:latest
+    state: started
+    hostname: bazarr
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    env:
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
+    volumes:
+      - "{{ plex_movies }}:/movies"
+      - "{{ plex_tv }}:/tv"
+      - "{{ bazarr_config }}:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - name: p2p
+        links:
+          - sonarr:sonarr
+          - radarr:radarr
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:bazarr.{{ domain }}"
+      traefik.basic.port: "6767"

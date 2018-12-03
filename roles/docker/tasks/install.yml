@@ -1,0 +1,16 @@
+---
+- name: Install Docker
+  yum:
+    name: docker-ce
+    state: latest
+    update_cache: yes
+  notify:
+    - start docker
+
+- name: Install docker python interface
+  pip:
+    name: docker
+
+- name: Containers internal network
+  docker_network:
+    name: p2p

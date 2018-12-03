@@ -1,0 +1,20 @@
+---
+- name: Portainer
+  docker_container:
+    name: portainer
+    image: portainer/portainer:latest
+    hostname: portainer
+    state: started
+    pull: yes
+    restart_policy: on-failure
+    restart_retries: 2
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/portainer:/data"
+    networks:
+      - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:portainer.{{ domain }}"
+      traefik.basic.port: "9000"

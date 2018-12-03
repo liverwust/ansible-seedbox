@@ -45,35 +45,3 @@
     name: '*'
     state: latest
     exclude: kernel*
-
-- name: Install necessary packages
-  yum:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - docker-ce
-      - python2-pip
-
-- name: Start dockerd
-  service:
-    name: docker
-    state: started
-
-- name: Install docker python interface
-  pip:
-    name: docker
-
-- name: Directories permissions
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: p2p
-    group: p2p
-  with_items:
-    - "{{ rtorrent_downloads }}"
-    - "{{ sonarr_downloads }}"
-    - "{{ radarr_downloads }}"
-    - "{{ plex_movies }}"
-    - "{{ plex_tv }}"
-    - "{{ bazarr_config }}"
-    - "{{ exposed_folder }}"
