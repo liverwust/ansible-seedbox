@@ -1,0 +1,35 @@
+---
+- file:
+    path: /etc/lighttpd
+    state: directory
+
+- name: Conf Lighttpd
+  template:
+    src: lighttpd/lighttpd.conf.j2
+    dest: /etc/lighttpd/lighttpd.conf
+  register: lighttpd
+
+- set_fact:
+    restart_lighttpd: "yes"
+  when: lighttpd is changed
+
+- name: Lighttpd
+  docker_container:
+    name: lighttpd
+    image: sebp/lighttpd:latest
+    state: started
+    hostname: lighttpd
+    restart: "{{ restart_lighttpd }}"
+    pull: yes
+    restart_policy: unless-stopped
+    volumes:
+      - "/var/www/lighttpd:/var/www/localhost"
+      - "/etc/lighttpd:/etc/lighttpd"
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:{{ domain }}"
+      traefik.basic.port: "8080"

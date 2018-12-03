@@ -1,0 +1,15 @@
+server.document-root = "/var/www/localhost" 
+
+server.port = 8080
+
+mimetype.assign = (
+  ".html" => "text/html", 
+  ".css" => "text/css", 
+  ".txt" => "text/plain",
+  ".jpg" => "image/jpeg",
+  ".png" => "image/png",
+  ".svg" => "image/svg+xml"
+)
+
+static-file.exclude-extensions = ( ".fcgi", ".php", ".rb", "~", ".inc" )
+index-file.names = ( "index.html" )

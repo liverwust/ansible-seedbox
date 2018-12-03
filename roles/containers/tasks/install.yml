@@ -12,7 +12,7 @@
     - "{{ plex_movies }}"
     - "{{ plex_tv }}"
     - "{{ bazarr_config }}"
-    - "{{ exposed_folder }}"
+    # - "{{ exposed_folder }}"
 
 - name: Setting containers
   include_tasks: "{{ item }}.yml"
@@ -28,6 +28,8 @@
     - ombi
     - tautulli
     - bazarr
+    - lighttpd
+    - caddy
 
 # - name: Cleaning unused images and volumes
 #   shell: |

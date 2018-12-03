@@ -1,5 +1,5 @@
 ---
-restart_caddy: "no"
+restart_lighttpd: "no"
 
 plex_docker_ip: "172.18.0.100"
 radarr_docker_ip: "172.18.0.100"
