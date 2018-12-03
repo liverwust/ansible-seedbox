@@ -2,6 +2,9 @@
 				gzip
 				root /var/www/html
 				tls {{ user_mail }}
+				errors  {
+					404	404.html
+				}
 }
 
 "metrics.{{ domain }}" {
