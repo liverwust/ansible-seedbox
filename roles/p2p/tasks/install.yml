@@ -1,4 +1,3 @@
----
 - name: Containers internal network
   docker_network:
     name: p2p
@@ -17,12 +16,10 @@
     cpu_period: 100000
     cpu_quota: 150000
     env:
-        UID: "{{ p2p_uid }}"
-        GID: "{{ group_gid }}"
+      UID: "{{ p2p_uid }}"
+      GID: "{{ group_gid }}"
     ports:
-      # - "51413:51413"
       - "45000:45000"
-      # - "6881:6881"
     volumes:
       - "{{ rtorrent_config }}:/config"
       - "{{ rtorrent_config }}/rtorrent/sessions:/data/.session"
@@ -30,6 +27,12 @@
       - "/etc/localtime:/etc/localtime:ro"
     networks:
       - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:rtorrent.{{ domain }}"
+      traefik.frontend.auth.basic.users: "{{ rutorrent_basicauth_user }}:{{ rutorrent_basicauth_password | password_hash('blowfish') }}"
+      traefik.basic.port: "8080"
 
 - name: Plex
   docker_container:
@@ -38,13 +41,12 @@
     state: started
     hostname: plex
     pull: yes
-    restart_policy: on-failure
-    restart_retries: 2
+    restart_policy: unless-stopped
     env:
-        PLEX_UID: "{{ plex_uid }}"
-        PLEX_GID: "{{ group_gid }}"
-        PLEX_CLAIM: "{{ plex_claim_token }}"
-        ADVERTISE_IP: "{{ ansible_host }}"
+      PLEX_UID: "{{ plex_uid }}"
+      PLEX_GID: "{{ group_gid }}"
+      PLEX_CLAIM: "{{ plex_claim_token }}"
+      ADVERTISE_IP: "{{ ansible_host }}"
     volumes:
       - "{{ plex_movies }}:/data/movies"
       - "{{ plex_tv }}:/data/tv"
@@ -56,6 +58,11 @@
     networks:
       - name: p2p
         ipv4_address: "{{ plex_docker_ip }}"
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:plex.{{ domain }}"
+      traefik.basic.port: "32400"
 
 - name: Jackett
   docker_container:
@@ -71,11 +78,15 @@
       - "{{ torrent_blackhole }}:/downloads"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
     networks:
       - name: p2p
-
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:jackett.{{ domain }}"
+      traefik.basic.port: "9117"
 
 - name: Radarr
   docker_container:
@@ -89,16 +100,20 @@
     volumes:
       - "/etc/radarr:/config"
       - "{{ medias_root }}:/p2p"
-      # - "{{ plex_movies }}:/movies"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
     networks:
       - name: p2p
         links:
           - rtorrent:rtorrent
           - jackett:jackett
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:radarr.{{ domain }}"
+      traefik.basic.port: "7878"
 
 - name: Sonarr
   docker_container:
@@ -112,16 +127,20 @@
     volumes:
       - "/etc/sonarr:/config"
       - "{{ medias_root }}:/p2p"
-      # - "{{ plex_tv }}:/tv"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
     networks:
       - name: p2p
         links:
           - rtorrent:rtorrent
           - jackett:jackett
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:sonarr.{{ domain }}"
+      traefik.basic.port: "8989"
 
 - name: Bazarr
   docker_container:
@@ -133,8 +152,8 @@
     restart_policy: on-failure
     restart_retries: 2
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
     volumes:
       - "{{ plex_movies }}:/movies"
       - "{{ plex_tv }}:/tv"
@@ -145,6 +164,11 @@
         links:
           - sonarr:sonarr
           - radarr:radarr
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:bazarr.{{ domain }}"
+      traefik.basic.port: "6767"
 
 - name: Tautulli
   docker_container:
@@ -160,10 +184,15 @@
       - "{{ plex_config }}/Library/Application Support/Plex Media Server/Logs:/plex_logs:ro"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
     networks:
       - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:tautulli.{{ domain }}"
+      traefik.basic.port: "8181"
 
 - name: Ombi
   docker_container:
@@ -178,39 +207,52 @@
       - "/etc/ombi:/config"
       - "/etc/localtime:/etc/localtime:ro"
     env:
-        PUID: "{{ p2p_uid }}"
-        PGID: "{{ group_gid }}"
+      PUID: "{{ p2p_uid }}"
+      PGID: "{{ group_gid }}"
     networks:
       - name: p2p
         links:
           - plex:plex
           - sonarr:sonarr
           - radarr:radarr
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:ombi.{{ domain }}"
+      traefik.basic.port: "3579"
 
 - name: Netdata
   docker_container:
     name: netdata
     image: firehol/netdata:latest
     pull: yes
+    state: started
     hostname: netdata
     restart_policy: on-failure
     restart_retries: 2
     capabilities: "SYS_PTRACE"
     env:
       PUID: "{{ netdata_uid }}"
-      PGID: 989     # Docker GID for socket permissions
+      PGID: 989 # Docker GID for socket permissions
     volumes:
       - "/proc:/host/proc:ro"
       - "/sys:/host/sys:ro"
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
       - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:metrics.{{ domain }}"
+      traefik.frontend.auth.basic.users: "{{ metrics_basicauth_user }}:{{ metrics_basicauth_password | password_hash('blowfish') }}"
+      traefik.basic.port: "19999"
 
 - name: Portainer
   docker_container:
     name: portainer
     image: portainer/portainer:latest
     hostname: portainer
+    state: started
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
@@ -219,58 +261,56 @@
       - "/var/portainer:/data"
     networks:
       - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:portainer.{{ domain }}"
+      traefik.basic.port: "9000"
 
-- name: Caddyfile
+- name: Ensures traefik dir exists
+  file:
+    path: "{{ traefik_dir }}"
+    state: directory
+
+- name: Ensures acme.json file exists
+  file:
+    path: "{{ traefik_dir }}/acme.json"
+    state: touch
+    mode: 0600
+
+- name: Adding traefik.toml file
   template:
-    src: caddyfile.j2
-    dest: /etc/Caddyfile
-  register: caddyfile
+    src: traefik.toml.j2
+    dest: "{{ traefik_dir }}/traefik.toml"
+    mode: 0600
 
-- set_fact:
-    restart_caddy: "yes"
-  when: caddyfile is changed
-
-- debug:
-    msg: "Restart caddy: {{ restart_caddy }}"
-
-- name: Reverse-Proxy
+- name: Create the traefik container
   docker_container:
-    name: reverse-proxy
-    image: abiosoft/caddy:latest
-    state: started
-    hostname: caddy
-    pull: yes
-    restart_policy: on-failure
-    restart_retries: 2
-    restart: "{{ restart_caddy }}"
-    volumes:
-      - "/etc/Caddyfile:/etc/Caddyfile"
-      - "/var/caddy/srv:/var/www/html"
-      - "{{ exposed_folder }}:/var/www/files/others"
-      - "{{ plex_movies }}:/var/www/files/movies"
-      - "{{ plex_tv }}:/var/www/files/tv"
-      - "/etc/caddy/certs:/root/.caddy"
-      - "/etc/localtime:/etc/localtime:ro"
-    env:
-        ACME_AGREE: true
+    name: traefik
+    image: traefik
+    restart_policy: unless-stopped
+    networks:
+      - name: p2p
     ports:
       - "80:80"
       - "443:443"
-      # - "2015:2015"
-    networks:
-      - name: p2p
-        links:
-          - rtorrent:rtorrent
-          - radarr:radarr
-          - sonarr:sonarr
-          - plex:plex
-          - bazarr:bazarr
-          - tautulli:tautulli
-          - ombi:ombi
-          - netdata:netdata
-          - portainer:portainer
+    volumes:
+      - "{{ traefik_dir }}/traefik.toml:/etc/traefik/traefik.toml"
+      - "{{ traefik_dir }}/acme.json:/acme.json"
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      traefik.frontend.rule: "Host:traefik.{{ domain }}"
+      traefik.docker.network: "p2p"
+      traefik.port: "8080"
+      traefik.enable: "true"
+      traefik.frontend.auth.basic.users: "{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"
+    env:
+      OVH_ENDPOINT: "{{ ovh_endpoint }}"
+      OVH_APPLICATION_KEY: "{{ ovh_application_key }}"
+      OVH_APPLICATION_SECRET: "{{ ovh_application_secret }}"
+      OVH_CONSUMER_KEY: "{{ ovh_consumer_key }}"
 
 - name: Cleaning unused images and volumes
   shell: |
-          docker image prune -af
-          docker volume prune -f
+    docker image prune -af
+    docker volume prune -f

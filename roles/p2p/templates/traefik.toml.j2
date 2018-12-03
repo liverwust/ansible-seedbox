@@ -1,0 +1,37 @@
+debug = false
+logLevel = "ERROR"
+defaultEntryPoints = ["https","http"]
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+  [entryPoints.https.tls]
+  
+
+[acme]
+  email = "{{ user_mail }}"
+  storage = "acme.json"
+  onHostRule = true
+  entryPoint = "https"
+  [acme.httpChallenge]
+    entryPoint = "http"
+
+[acme.dnsChallenge]
+  provider = "ovh"
+
+[[acme.domains]]
+  main = "*.{{ domain }}"
+  sans = ["{{ domain }}"]
+
+[api]
+
+  entryPoint = "traefik"
+  dashboard = true
+
+
+[docker]
+  endpoint = "unix:///var/run/docker.sock"
+  domain = "{{ domain }}"
+  watch = true
