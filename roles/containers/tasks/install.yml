@@ -29,5 +29,6 @@
     - tautulli
     - bazarr
     - lighttpd
-    - caddy
+    # - caddy
+    - h5ai
     - watchtower

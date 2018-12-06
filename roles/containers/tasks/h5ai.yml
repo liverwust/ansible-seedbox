@@ -1,0 +1,22 @@
+---
+- name: H5ai
+  docker_container:
+    name: h5ai
+    image: bixidock/h5ai:latest
+    state: started
+    hostname: h5ai
+    pull: yes
+    restart_policy: unless-stopped
+    volumes:
+      - "{{ exposed_folder }}:/var/www/Others:ro"
+      - "{{ plex_movies }}:/var/www/Movies:ro"
+      - "{{ plex_tv }}:/var/www/Tv:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    networks:
+      - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:files.{{ domain }}"
+      traefik.basic.port: "8080"
+      traefik.frontend.auth.basic.users: "{{ files_basicauth_user }}:{{ files_basicauth_password | password_hash('blowfish') }}"
