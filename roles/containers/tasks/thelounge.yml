@@ -1,0 +1,23 @@
+---
+- file:
+    path: "/var/opt/thelounge"
+    state: directory
+
+- name: TheLounge
+  docker_container:
+    name: thelounge
+    image: thelounge/thelounge:3.0.0-rc.5-alpine
+    state: started
+    hostname: thelounge
+    pull: yes
+    restart_policy: unless-stopped
+    volumes:
+      - /var/opt/thelounge:/var/opt/thelounge
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - name: p2p
+    labels:
+      traefik.docker.network: "p2p"
+      traefik.enable: "true"
+      traefik.basic.frontend.rule: "Host:thelounge.{{ domain }}"
+      traefik.basic.port: "9000"

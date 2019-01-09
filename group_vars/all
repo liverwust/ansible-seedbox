@@ -37,3 +37,5 @@ metrics_basicauth_password: "admin"
 
 files_basicauth_user: "admin"
 files_basicauth_password: "admin"
+
+dd_api_key: "xxxxxxxxxxxxxxx"

@@ -19,9 +19,11 @@
   with_items:
     - traefik
     - portainer
-    - netdata
+    - datadog
+    # - netdata
     - plex
     - rtorrent
+    # - flood
     - jackett
     - sonarr
     - radarr
@@ -29,6 +31,7 @@
     - tautulli
     - bazarr
     - lighttpd
+    - thelounge
     # - caddy
     - h5ai
     - watchtower

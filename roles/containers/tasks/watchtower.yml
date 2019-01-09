@@ -8,4 +8,4 @@
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
-    command: --schedule "0 0 5 * * 6" --cleanup
+    command: --schedule "0 0 5 * * 1,5" --cleanup
