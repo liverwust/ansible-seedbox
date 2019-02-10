@@ -28,6 +28,8 @@
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
+    cpu_period: 100000
+    cpu_quota: 150000
     env:
       UID: "{{ p2p_uid }}"
       GID: "{{ group_gid }}"

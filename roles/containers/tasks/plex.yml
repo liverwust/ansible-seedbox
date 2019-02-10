@@ -22,7 +22,6 @@
       - "32400:32400"
     networks:
       - name: p2p
-        ipv4_address: "{{ plex_docker_ip }}"
     labels:
       traefik.docker.network: "p2p"
       traefik.enable: "true"

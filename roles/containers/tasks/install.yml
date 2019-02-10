@@ -20,10 +20,8 @@
     - traefik
     - portainer
     - datadog
-    # - netdata
     - plex
     - rtorrent
-    # - flood
     - jackett
     - sonarr
     - radarr
@@ -32,6 +30,5 @@
     - bazarr
     - lighttpd
     - thelounge
-    # - caddy
     - h5ai
     - watchtower

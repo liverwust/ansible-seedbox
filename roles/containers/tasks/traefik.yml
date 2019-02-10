@@ -35,7 +35,6 @@
       traefik.docker.network: "p2p"
       traefik.port: "8080"
       traefik.enable: "true"
-      # traefik.frontend.auth.basic.users: "{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"
     env:
       OVH_ENDPOINT: "{{ ovh_endpoint }}"
       OVH_APPLICATION_KEY: "{{ ovh_application_key }}"

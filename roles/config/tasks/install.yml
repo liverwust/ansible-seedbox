@@ -31,7 +31,6 @@
     - { name: "deployer", groups: "wheel", append: yes, createhome: yes , uid: "1000", shell: "/bin/bash" }
     - { name: "{{ p2p_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ p2p_uid }}", shell: "/bin/bash" }
     - { name: "{{ plex_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ plex_uid }}", shell: "/sbin/nologin" }
-    # - { name: "{{ netdata_user }}", groups: "docker", append: yes, createhome: no, uid: "{{ netdata_uid }}", shell: "/sbin/nologin" }
 
 - name: Set up authorized keys for the deployer user
   authorized_key: 

@@ -2,6 +2,6 @@
   
 - hosts: all
   roles:
-    - { role: config }
-    - { role: docker }
-    - { role: containers }
+    - { role: config, become: yes }
+    - { role: docker, become: yes }
+    - { role: containers, become: yes }
