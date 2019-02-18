@@ -11,11 +11,11 @@ defaultEntryPoints = ["https","http"]
     address = ":443"
   [entryPoints.https.tls]
   
-  [entryPoints.traefik]
-    address = ":8080"
-    [entryPoints.traefik.auth]
-      [entryPoints.traefik.auth.basic]
-        users = ["{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"]
+  # [entryPoints.traefik]
+  #   address = ":8080"
+  #   [entryPoints.traefik.auth]
+  #     [entryPoints.traefik.auth.basic]
+  #       users = ["{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"]
   
 
 [acme]
@@ -36,7 +36,7 @@ defaultEntryPoints = ["https","http"]
 [api]
 
   entryPoint = "traefik"
-  dashboard = true
+  dashboard = false
 
 
 [docker]

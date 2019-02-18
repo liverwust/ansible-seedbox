@@ -20,6 +20,8 @@
       - "/etc/localtime:/etc/localtime:ro"
     ports:
       - "32400:32400"
+    devices:
+            - "/dev/dri:/dev/dri:rwm"
     networks:
       - name: p2p
     labels:

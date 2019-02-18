@@ -6,7 +6,7 @@
 - name: TheLounge
   docker_container:
     name: thelounge
-    image: thelounge/thelounge:3.0.0-rc.5-alpine
+    image: thelounge/thelounge:3.0.1-alpine
     state: started
     hostname: thelounge
     pull: yes
