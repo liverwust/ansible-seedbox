@@ -1,4 +1,3 @@
----
 - name: Ensuring group 'wheel' exists
   group:
     name: "wheel"
@@ -14,12 +13,12 @@
   lineinfile:
     dest: /etc/sudoers
     state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    validate: 'visudo -cf %s'
+    regexp: "^%wheel"
+    line: "%wheel ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"
 
 - name: Creating users
-  user: 
+  user:
     name: "{{ item.name }}"
     groups: "{{ item.groups}} "
     append: "{{ item.append}}"
@@ -28,19 +27,40 @@
     uid: "{{ item.uid }}"
     shell: "{{ item.shell }}"
   with_items:
-    - { name: "deployer", groups: "wheel", append: yes, createhome: yes , uid: "1000", shell: "/bin/bash" }
-    - { name: "{{ p2p_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ p2p_uid }}", shell: "/bin/bash" }
-    - { name: "{{ plex_user }}", groups: "{{ group_name }}", append: yes, createhome: no, uid: "{{ plex_uid }}", shell: "/sbin/nologin" }
+    - {
+        name: "deployer",
+        groups: "wheel",
+        append: yes,
+        createhome: yes,
+        uid: "1000",
+        shell: "/bin/bash",
+      }
+    - {
+        name: "{{ p2p_user }}",
+        groups: "{{ group_name }}",
+        append: yes,
+        createhome: no,
+        uid: "{{ p2p_uid }}",
+        shell: "/bin/bash",
+      }
+    - {
+        name: "{{ plex_user }}",
+        groups: "{{ group_name }}",
+        append: yes,
+        createhome: no,
+        uid: "{{ plex_uid }}",
+        shell: "/sbin/nologin",
+      }
 
 - name: Set up authorized keys for the deployer user
-  authorized_key: 
-    user: deployer 
+  authorized_key:
+    user: deployer
     key: "{{ item }}"
   with_file:
     - "~/.ssh/id_rsa.pub"
 
 - name: Upgrade all packages except kernel
   yum:
-    name: '*'
+    name: "*"
     state: latest
     exclude: kernel*

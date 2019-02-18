@@ -9,9 +9,9 @@
     restart_policy: unless-stopped
     env:
       PLEX_UID: "{{ plex_uid }}"
-      PLEX_GID: "{{ group_gid }}"
+      PLEX_GID: "39" # colision with 'irc' GID from container for access to /dev/dri  # FIXME
       PLEX_CLAIM: "{{ plex_claim_token }}"
-      ADVERTISE_IP: "{{ ansible_host }}"
+      ADVERTISE_IP: "https://plex.{{ domain }}/"
     volumes:
       - "{{ plex_movies }}:/data/movies"
       - "{{ plex_tv }}:/data/tv"
@@ -21,7 +21,7 @@
     ports:
       - "32400:32400"
     devices:
-            - "/dev/dri:/dev/dri:rwm"
+      - "/dev/dri:/dev/dri:rwm"
     networks:
       - name: p2p
     labels:
