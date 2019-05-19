@@ -19,7 +19,7 @@
   with_items:
     - traefik
     - portainer
-    - datadog
+    # - datadog
     - plex
     - rtorrent
     - jackett

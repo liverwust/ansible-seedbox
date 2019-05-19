@@ -10,13 +10,6 @@ defaultEntryPoints = ["https","http"]
   [entryPoints.https]
     address = ":443"
   [entryPoints.https.tls]
-  
-  # [entryPoints.traefik]
-  #   address = ":8080"
-  #   [entryPoints.traefik.auth]
-  #     [entryPoints.traefik.auth.basic]
-  #       users = ["{{ traefik_user }}:{{ traefik_password | password_hash('blowfish') }}"]
-  
 
 [acme]
   email = "{{ user_mail }}"
@@ -26,18 +19,16 @@ defaultEntryPoints = ["https","http"]
   [acme.httpChallenge]
     entryPoint = "http"
 
-[acme.dnsChallenge]
-  provider = "ovh"
+  [acme.dnsChallenge]
+    provider = "ovh"
 
-[[acme.domains]]
-  main = "*.{{ domain }}"
-  sans = ["{{ domain }}"]
+  [[acme.domains]]
+    main = "*.{{ domain }}"
+    sans = ["{{ domain }}"]
 
 [api]
-
   entryPoint = "traefik"
   dashboard = false
-
 
 [docker]
   endpoint = "unix:///var/run/docker.sock"
