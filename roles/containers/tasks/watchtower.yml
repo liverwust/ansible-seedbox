@@ -2,7 +2,7 @@
 - name: WatchTower
   docker_container:
     name: watchtower
-    image: v2tec/watchtower:latest
+    image: containrrr/watchtower:latest
     state: started
     restart_policy: unless-stopped
     volumes:

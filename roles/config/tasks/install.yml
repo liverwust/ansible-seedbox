@@ -63,4 +63,4 @@
   yum:
     name: "*"
     state: latest
-    exclude: kernel*
+    exclude: kernel*,docker*
