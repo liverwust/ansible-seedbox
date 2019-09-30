@@ -18,6 +18,7 @@
       - "{{ plex_movies }}:/var/www/files/movies"
       - "{{ plex_tv }}:/var/www/files/tv"
       - "/etc/localtime:/etc/localtime:ro"
+    purge_networks: yes
     networks:
       - name: p2p
     labels:

@@ -11,6 +11,7 @@
     hostname: thelounge
     pull: yes
     restart_policy: unless-stopped
+    purge_networks: yes
     volumes:
       - /var/opt/thelounge:/var/opt/thelounge
       - /etc/localtime:/etc/localtime:ro

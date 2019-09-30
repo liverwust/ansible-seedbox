@@ -59,7 +59,7 @@
   with_file:
     - "~/.ssh/id_rsa.pub"
 
-- name: Upgrade all packages except kernel
+- name: Upgrade all packages except kernel and Docker
   yum:
     name: "*"
     state: latest

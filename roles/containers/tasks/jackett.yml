@@ -15,6 +15,7 @@
     env:
       PUID: "{{ p2p_uid }}"
       PGID: "{{ group_gid }}"
+    purge_networks: yes
     networks:
       - name: p2p
     labels:

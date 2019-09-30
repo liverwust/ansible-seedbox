@@ -8,6 +8,7 @@
     pull: yes
     restart_policy: on-failure
     restart_retries: 2
+    purge_networks: yes
     volumes:
       - "/etc/tautulli:/config"
       - "{{ plex_config }}/Library/Application Support/Plex Media Server/Logs:/plex_logs:ro"

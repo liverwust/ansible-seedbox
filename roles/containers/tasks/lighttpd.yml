@@ -26,6 +26,7 @@
       - "/var/www/lighttpd:/var/www/localhost"
       - "/etc/lighttpd:/etc/lighttpd"
       - "/etc/localtime:/etc/localtime:ro"
+    purge_networks: yes
     networks:
       - name: p2p
     labels:

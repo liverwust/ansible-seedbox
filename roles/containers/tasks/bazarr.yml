@@ -16,6 +16,7 @@
       - "{{ plex_tv }}:/tv"
       - "{{ bazarr_config }}:/config"
       - "/etc/localtime:/etc/localtime:ro"
+    purge_networks: yes
     networks:
       - name: p2p
         links:
