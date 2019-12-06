@@ -2,7 +2,7 @@
 - name: Plex
   docker_container:
     name: plex
-    image: plexinc/pms-docker:public
+    image: plexinc/pms-docker:plexpass
     state: started
     hostname: plex
     pull: yes
