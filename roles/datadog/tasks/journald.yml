@@ -1,0 +1,15 @@
+---
+- file:
+    path: "{{ dd_config_path }}/conf.d/journald.d"
+    state: directory
+    mode: 0755
+    owner: dd-agent
+    group: dd-agent
+
+- name: Push fail2ban log config file
+  template:
+    src: journald.yaml.j2
+    dest: "{{ dd_config_path }}/conf.d/journald.d/conf.yaml"
+    owner: dd-agent
+    group: dd-agent
+  notify: restart dd-agent

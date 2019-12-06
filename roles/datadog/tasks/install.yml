@@ -28,15 +28,32 @@
 - name: Datadog Agent config
   template:
     src: datadog.yaml.j2
-    dest: /etc/datadog-agent/datadog.yaml
+    dest: "{{ dd_config_path }}/datadog.yaml"
     owner: dd-agent
     group: dd-agent
   notify: restart dd-agent
 
-- name: Datadog Agent config docker daemon
+- name: Docker config
   template:
     src: docker-daemon.yaml.j2
-    dest: /etc/datadog-agent/conf.d/docker.d/docker_daemon.yaml
+    dest: "{{ dd_config_path }}/conf.d/docker.d/docker_daemon.yaml"
     owner: dd-agent
     group: dd-agent
   notify: restart dd-agent
+
+- name: Disk check config
+  template:
+    src: disk.yaml.j2
+    dest: "{{ dd_config_path }}/conf.d/disk.d/conf.yaml"
+    owner: dd-agent
+    group: dd-agent
+  notify: restart dd-agent
+
+- name: Fail2ban log collection
+  include: fail2ban.yml
+
+- name: Stream journald logs
+  include: journald.yml
+
+# restarting datadog-agent if needed
+- meta: flush_handlers
