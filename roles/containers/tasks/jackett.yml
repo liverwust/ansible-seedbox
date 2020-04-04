@@ -1,4 +1,11 @@
 ---
+- name: Check required dependencies (bazarr)
+  fail:
+    msg: "jackett requires {{ item }}"
+  with_items:
+    - rtorrent
+  when: not use_containers[item]
+
 - name: Jackett
   docker_container:
     name: jackett

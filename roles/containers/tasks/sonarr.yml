@@ -1,4 +1,27 @@
 ---
+- name: Directories permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ sonarr_downloads }}"
+
+- name: Configure optional network links (sonarr)
+  set_fact:
+    sonarr_network_links: "{{ sonarr_network_links | default([]) }} + [item]"
+  with_items:
+    - rtorrent:rtorrent
+  when: use_containers.rtorrent
+
+- name: Configure optional network links (sonarr)
+  set_fact:
+    sonarr_network_links: "{{ sonarr_network_links | default([]) }} + [item]"
+  with_items:
+    - jackett:jackett
+  when: use_containers.jackett
+
 - name: Sonarr
   docker_container:
     name: sonarr
@@ -18,9 +41,7 @@
     purge_networks: yes
     networks:
       - name: p2p
-        links:
-          - rtorrent:rtorrent
-          - jackett:jackett
+        links: "{{ sonarr_network_links }}"
     labels:
       traefik.docker.network: "p2p"
       traefik.enable: "true"

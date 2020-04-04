@@ -1,4 +1,14 @@
 ---
+- name: Directories permissions (rtorrent)
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ rtorrent_downloads }}"
+    - "{{ exposed_folder }}"
+
 - file:
     path: "{{ path }}"
     state: directory

@@ -1,4 +1,24 @@
 ---
+- name: Configure volumes (h5ai)
+  set_fact:
+    h5ai_volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+
+- name: Configure optional volumes (h5ai)
+  set_fact:
+    h5ai_volumes: "h5ai_volumes + [item]"
+  with_items:
+    - "{{ plex_movies }}:/var/www/Movies:ro"
+    - "{{ plex_tv }}:/var/www/Tv:ro"
+  when: use_containers.plex
+
+- name: Configure optional volumes (h5ai)
+  set_fact:
+    h5ai_volumes: "h5ai_volumes + [item]"
+  with_items:
+    - "{{ exposed_folder }}:/var/www/Others:ro"
+  when: use_containers.rtorrent
+
 - name: H5ai
   docker_container:
     name: h5ai
@@ -7,11 +27,7 @@
     hostname: h5ai
     pull: yes
     restart_policy: unless-stopped
-    volumes:
-      - "{{ exposed_folder }}:/var/www/Others:ro"
-      - "{{ plex_movies }}:/var/www/Movies:ro"
-      - "{{ plex_tv }}:/var/www/Tv:ro"
-      - "/etc/localtime:/etc/localtime:ro"
+    volumes: "{{ h5ai_volumes }}"
     purge_networks: yes
     networks:
       - name: p2p

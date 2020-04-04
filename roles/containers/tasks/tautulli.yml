@@ -1,4 +1,11 @@
 ---
+- name: Check required dependencies (bazarr)
+  fail:
+    msg: "tautulli requires {{ item }}"
+  with_items:
+    - plex
+  when: not use_containers[item]
+
 - name: Tautulli
   docker_container:
     name: tautulli

@@ -1,4 +1,25 @@
 ---
+- name: Configure optional network links (ombi)
+  set_fact:
+    ombi_network_links: "{{ ombi_network_links | default([]) }} + [item]"
+  with_items:
+    - plex:plex
+  when: use_containers.plex
+
+- name: Configure optional network links (ombi)
+  set_fact:
+    ombi_network_links: "{{ ombi_network_links | default([]) }} + [item]"
+  with_items:
+    - sonarr:sonarr
+  when: use_containers.sonarr
+
+- name: Configure optional network links (ombi)
+  set_fact:
+    ombi_network_links: "{{ ombi_network_links | default([]) }} + [item]"
+  with_items:
+    - radarr:radarr
+  when: use_containers.radarr
+
 - name: Ombi
   docker_container:
     name: ombi
@@ -17,10 +38,7 @@
     purge_networks: yes
     networks:
       - name: p2p
-        links:
-          - plex:plex
-          - sonarr:sonarr
-          - radarr:radarr
+        links: "{{ ombi_network_links }}"
     labels:
       traefik.docker.network: "p2p"
       traefik.enable: "true"

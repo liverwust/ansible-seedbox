@@ -1,33 +1,56 @@
 ---
-- name: Directories permissions
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: p2p
-    group: p2p
-  with_items:
-    - "{{ rtorrent_downloads }}"
-    - "{{ sonarr_downloads }}"
-    - "{{ radarr_downloads }}"
-    - "{{ plex_movies }}"
-    - "{{ plex_tv }}"
-    - "{{ bazarr_config }}"
-    - "{{ exposed_folder }}"
+- name: Setting containers (traefik)
+  include_tasks: "traefik.yml"
+  when: use_containers.traefik
 
-- name: Setting containers
-  include_tasks: "{{ item }}.yml"
-  with_items:
-    - traefik
-    - portainer
-    - plex
-    - rtorrent
-    - jackett
-    - sonarr
-    - radarr
-    - ombi
-    - tautulli
-    - bazarr
-    - lighttpd
-    - thelounge
-    - h5ai
-    - watchtower
+- name: Setting containers (portainer)
+  include_tasks: "portainer.yml"
+  when: use_containers.portainer
+
+- name: Setting containers (plex)
+  include_tasks: "plex.yml"
+  when: use_containers.plex
+
+- name: Setting containers (rtorrent)
+  include_tasks: "rtorrent.yml"
+  when: use_containers.rtorrent
+
+- name: Setting containers (jackett)
+  include_tasks: "jackett.yml"
+  when: use_containers.jackett
+
+- name: Setting containers (sonarr)
+  include_tasks: "sonarr.yml"
+  when: use_containers.sonarr
+
+- name: Setting containers (radarr)
+  include_tasks: "radarr.yml"
+  when: use_containers.radarr
+
+- name: Setting containers (ombi)
+  include_tasks: "ombi.yml"
+  when: use_containers.ombi
+
+- name: Setting containers (tautulli)
+  include_tasks: "tautulli.yml"
+  when: use_containers.tautulli
+
+- name: Setting containers (bazarr)
+  include_tasks: "bazarr.yml"
+  when: use_containers.bazarr
+
+- name: Setting containers (lighttpd)
+  include_tasks: "lighttpd.yml"
+  when: use_containers.lighttpd
+
+- name: Setting containers (thelounge)
+  include_tasks: "thelounge.yml"
+  when: use_containers.thelounge
+
+- name: Setting containers (h5ai)
+  include_tasks: "h5ai.yml"
+  when: use_containers.h5ai
+
+- name: Setting containers (watchtower)
+  include_tasks: "watchtower.yml"
+  when: use_containers.watchtower

@@ -1,2 +1,20 @@
 ---
 restart_lighttpd: "no"
+
+# Override these settings in vars/main.yml to disable any subset of the
+# installed containers.
+use_containers:
+  bazarr:     true
+  h5ai:       true
+  jackett:    true
+  lighttpd:   true
+  ombi:       true
+  plex:       true
+  portainer:  true
+  radarr:     true
+  rtorrent:   true
+  sonarr:     true
+  tautulli:   true
+  thelounge:  true
+  traefik:    true
+  watchtower: true

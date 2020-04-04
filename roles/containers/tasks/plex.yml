@@ -1,4 +1,14 @@
 ---
+- name: Directories permissions
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ plex_movies }}"
+    - "{{ plex_tv }}"
+
 - name: Plex
   docker_container:
     name: plex

@@ -1,4 +1,46 @@
 ---
+- name: Check required dependencies (bazarr)
+  fail:
+    msg: "bazarr requires either sonarr or radarr"
+  when: not use_containers.sonarr and not use_containers.radarr
+
+- name: Directories permissions (bazarr)
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: p2p
+    group: p2p
+  with_items:
+    - "{{ bazarr_config }}"
+
+- name: Configure volumes (bazarr)
+  set_fact:
+    bazarr_volumes:
+      - "{{ bazarr_config }}:/config"
+      - "/etc/localtime:/etc/localtime:ro"
+
+- name: Configure optional volumes (bazarr)
+  set_fact:
+    bazarr_volumes: "bazarr_volumes + [item]"
+  with_items:
+    - "{{ plex_movies }}:/movies"
+    - "{{ plex_tv }}:/tv"
+  when: use_containers.plex
+
+- name: Configure optional network links (bazarr)
+  set_fact:
+    bazarr_network_links: "{{ bazarr_network_links | default([]) }} + [item]"
+  with_items:
+    - sonarr:sonarr
+  when: use_containers.sonarr
+
+- name: Configure optional network links (bazarr)
+  set_fact:
+    bazarr_network_links: "{{ bazarr_network_links | default([]) }} + [item]"
+  with_items:
+    - radarr:radarr
+  when: use_containers.radarr
+
 - name: Bazarr
   docker_container:
     name: bazarr
@@ -11,17 +53,11 @@
     env:
       PUID: "{{ p2p_uid }}"
       PGID: "{{ group_gid }}"
-    volumes:
-      - "{{ plex_movies }}:/movies"
-      - "{{ plex_tv }}:/tv"
-      - "{{ bazarr_config }}:/config"
-      - "/etc/localtime:/etc/localtime:ro"
+    volumes: "{{ bazarr_volumes }}"
     purge_networks: yes
     networks:
       - name: p2p
-        links:
-          - sonarr:sonarr
-          - radarr:radarr
+        links: "{{ bazarr_network_links }}"
     labels:
       traefik.docker.network: "p2p"
       traefik.enable: "true"
