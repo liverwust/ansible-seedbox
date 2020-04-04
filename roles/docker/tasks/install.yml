@@ -1,4 +1,30 @@
 ---
+- name: Check whether the Docker repository is already installed
+  find:
+    paths:
+      - /etc/yum.repos.d
+    contains: ".*download.docker.com.*"
+  register: docker_ce_repo_files
+
+- debug:
+    msg: "{{ docker_ce_repo_files.matched }}"
+
+# https://docs.docker.com/install/linux/docker-ce/centos/
+- name: Install the Docker CE Stable repository
+  yum_repository:
+    name: docker-ce
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  when: "docker_ce_repo_files.matched == 0"
+
+- name: Install the EPEL RPM from a remote repo (for pip)
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+
 - name: Install Docker
   yum:
     name: docker-ce
@@ -6,6 +32,14 @@
     update_cache: yes
   notify:
     - start docker
+
+- name: Ensure that Docker is started, if not already
+  meta: flush_handlers
+
+- name: Install pip
+  yum:
+    name: python-pip
+    state: latest
 
 - name: Install docker python interface
   pip:
