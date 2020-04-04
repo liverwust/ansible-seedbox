@@ -28,7 +28,7 @@
     shell: "{{ item.shell }}"
   with_items:
     - {
-        name: "deployer",
+        name: "{{ ansible_user }}",
         groups: "wheel",
         append: yes,
         createhome: yes,
