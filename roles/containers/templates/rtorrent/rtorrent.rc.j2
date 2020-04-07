@@ -36,3 +36,8 @@ execute2 = {sh,-c,/usr/bin/php /nginx/www/html/torrent/php/initplugins.php torre
 schedule2 = watch_directory,1,1,"load.start=/data/.watch/*.torrent"
 schedule2 = untied_directory,5,5,"stop_untied=/data/.watch/*.torrent"
 schedule2 = espace_disque_insuffisant,1,30,close_low_diskspace=500M
+
+# Seedbox
+# https://cheapseedboxes.com/setting-ratio-groups-rutorrent/
+ratio.enable =
+ratio.min.set = 250
