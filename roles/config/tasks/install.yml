@@ -54,7 +54,7 @@
 
 - name: Set up authorized keys for the deployer user
   authorized_key:
-    user: deployer
+    user: "{{ ansible_user }}"
     key: "{{ item }}"
   with_file:
     - "~/.ssh/id_rsa.pub"

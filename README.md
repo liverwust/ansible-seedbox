@@ -38,3 +38,4 @@ Container auto-updates are managed using [Watchtower](https://github.com/contain
 - The RAID0 configuration and partitions definition is not included in this script.
 - This is also a good idea to define separate partitions for you media files and your `$DOCKER_HOME` (usually `/var/lib/docker`).
 - It is a good idea to setup `fail2ban` for blocking suspicious SSH connections.
+- The passlib (or python3-passlib or python-passlib) OS package must be installed on the system where Ansible runs, to prevent errors like "crypt.crypt does not support 'bcrypt' algorithm."
