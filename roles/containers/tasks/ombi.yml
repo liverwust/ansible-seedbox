@@ -38,7 +38,7 @@
     purge_networks: yes
     networks:
       - name: p2p
-        links: "{{ ombi_network_links }}"
+        links: "{{ ombi_network_links | default([]) }}"
     labels:
       traefik.docker.network: "p2p"
       traefik.enable: "true"
