@@ -19,6 +19,7 @@ plex_transcode: "{{ plex_medias }}/transcode"
 # LWW customizations
 use_containers:
   bazarr:     false
+  ftpserver:  true
   h5ai:       true
   jackett:    false
   lighttpd:   true
