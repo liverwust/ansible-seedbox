@@ -43,6 +43,10 @@
   include_tasks: "lighttpd.yml"
   when: use_containers.lighttpd
 
+- name: Setting containers (ftpserver)
+  include_tasks: "ftpserver.yml"
+  when: use_containers.ftpserver
+
 - name: Setting containers (thelounge)
   include_tasks: "thelounge.yml"
   when: use_containers.thelounge

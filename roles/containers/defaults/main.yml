@@ -5,6 +5,7 @@ restart_lighttpd: "no"
 # installed containers.
 use_containers:
   bazarr:     true
+  ftpserver:  true
   h5ai:       true
   jackett:    true
   lighttpd:   true

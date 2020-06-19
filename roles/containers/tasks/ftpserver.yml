@@ -1,0 +1,23 @@
+---
+
+- name: Ftpserver
+  docker_container:
+    name: ftpserver
+    image: bogem/ftp:latest
+    state: started
+    hostname: ftpserver
+    pull: yes
+    restart_policy: unless-stopped
+    env:
+      FTP_USER: "{{ rutorrent_basicauth_user }}"
+      FTP_PASS: "{{ rutorrent_basicauth_password }}"
+      PASV_ADDRESS: "{{ ansible_default_ipv4.address }}"
+    ports:
+      - 20:20/tcp
+      - 21:21/tcp
+      - 47400-47470:47400-47470/tcp
+    volumes:
+      - "{{ rtorrent_downloads }}:/home/vsftpd"
+    purge_networks: yes
+    networks:
+      - name: p2p
