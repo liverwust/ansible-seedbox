@@ -21,3 +21,51 @@
     purge_networks: yes
     networks:
       - name: p2p
+  register: ftpserver
+
+- name: Create temporary file for runscript
+  tempfile:
+    state: file
+  register: ftpserver_runscript_location
+  when: ftpserver is changed
+
+- name: Extract runscript from ftpserver container
+  command: docker container cp ftpserver:/usr/sbin/run-vsftpd.sh "{{ ftpserver_runscript_location.path }}"
+  when: ftpserver is changed
+
+# Otherwise chown will set the owner to 105:106 to match the "ftp" user
+# inside the container
+- name: Modify runscript to not chown the downloads directory
+  lineinfile:
+    path: "{{ ftpserver_runscript_location.path }}"
+    regexp: '^chown -R ftp:ftp'
+    state: absent
+  register: ftpserver_runscript
+  when: ftpserver is changed
+
+- name: Copy the runscript back into the Docker container
+  command: docker container cp "{{ ftpserver_runscript_location.path }}" ftpserver:/usr/sbin/run-vsftpd.sh
+  when: ftpserver is changed and ftpserver_runscript is changed
+
+- name: Remove the temporary runscript file
+  file:
+    path: "{{ ftpserver_runscript_location }}"
+    state: absent
+  when: ftpserver is changed
+
+- name: Restart the container if necessary
+  docker_container:
+    name: ftpserver
+    restart: yes
+    state: started
+  when: ftpserver is changed and ftpserver_runscript is changed
+
+# Otherwise rtorrent will be unable to save new torrent files
+- name: Fix any permissions which might have been overridden by ftpserver
+  file:
+    state: directory
+    path: "{{ rtorrent_downloads }}"
+    owner: p2p
+    group: users
+    recurse: yes
+  when: ftpserver is changed
